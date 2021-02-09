@@ -1,0 +1,9 @@
+L:\Develop\CS\FlappyPaimon\bin\Release\FlappyPaimon.exe
+L:\Develop\CS\FlappyPaimon\bin\Release\FlappyPaimon.pdb
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.csprojAssemblyReference.cache
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.Form1.resources
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.Properties.Resources.resources
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.csproj.GenerateResource.cache
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.csproj.CoreCompileInputs.cache
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.exe
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.pdb
