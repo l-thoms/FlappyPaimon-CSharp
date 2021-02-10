@@ -15,7 +15,9 @@ namespace FlappyPaimon
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new Form1());
+			Form1 form1 = new Form1();
+			//Application.Run(form1);
+			SharpDX.Windows.RenderLoop.Run(form1, form1.Render);
 		}
 	}
 }

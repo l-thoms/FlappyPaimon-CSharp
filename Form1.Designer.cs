@@ -28,14 +28,19 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
-			this.UItimer = new System.Windows.Forms.Timer(this.components);
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+			this.GameUI = new FlappyPaimon.BufferedPanel();
 			this.SuspendLayout();
 			// 
-			// UItimer
+			// GameUI
 			// 
-			this.UItimer.Interval = 1;
-			this.UItimer.Tick += new System.EventHandler(this.UItimer_Tick);
+			this.GameUI.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+			this.GameUI.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.GameUI.Location = new System.Drawing.Point(0, 0);
+			this.GameUI.Name = "GameUI";
+			this.GameUI.Size = new System.Drawing.Size(800, 450);
+			this.GameUI.TabIndex = 0;
+			this.GameUI.MouseClick += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
 			// 
 			// Form1
 			// 
@@ -44,15 +49,20 @@
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(97)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
 			this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.GameUI);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.MinimumSize = new System.Drawing.Size(320, 240);
 			this.Name = "Form1";
-			this.Text = "Form1";
+			this.Text = "Flappy Paimon";
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
+			this.Load += new System.EventHandler(this.Form1_Load);
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
 
-		private System.Windows.Forms.Timer UItimer;
+		public BufferedPanel GameUI;
 	}
 }
 
