@@ -41,6 +41,7 @@
 			this.GameUI.Size = new System.Drawing.Size(800, 450);
 			this.GameUI.TabIndex = 0;
 			this.GameUI.MouseClick += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
+			this.GameUI.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
 			// 
 			// Form1
 			// 
@@ -51,11 +52,13 @@
 			this.ClientSize = new System.Drawing.Size(800, 450);
 			this.Controls.Add(this.GameUI);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.KeyPreview = true;
 			this.MinimumSize = new System.Drawing.Size(320, 240);
 			this.Name = "Form1";
 			this.Text = "Flappy Paimon";
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
 			this.Load += new System.EventHandler(this.Form1_Load);
+			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 			this.ResumeLayout(false);
 
 		}

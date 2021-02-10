@@ -24,9 +24,7 @@ namespace THAnimations
 				else return true;
 		}
 		}
-#pragma warning disable CS0649 // 从未对字段“EasyAni.Animating”赋值，字段将一直保持其默认值 null
 		public EventHandler Animating;
-#pragma warning restore CS0649 // 从未对字段“EasyAni.Animating”赋值，字段将一直保持其默认值 null
 		public EventHandler Animated;
 		Timer aniTimer = null;
 		Stopwatch aniWatch;

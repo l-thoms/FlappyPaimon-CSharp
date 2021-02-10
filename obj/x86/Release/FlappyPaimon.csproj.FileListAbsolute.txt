@@ -25,3 +25,4 @@ L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.DXGI.xml
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Desktop.dll
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Desktop.pdb
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Desktop.xml
+L:\Develop\CS\FlappyPaimon\bin\x86\Release\FlappyPaimon.exe.config
