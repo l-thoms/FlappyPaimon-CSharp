@@ -161,6 +161,7 @@ namespace FlappyPaimon
 		long BeginTime = 0;
 		System.Timers.Timer pTimer = new System.Timers.Timer() { Interval = 333,Enabled = true };
 		int Score = 0;
+
 		double PLocation = 50,PRotation = 0;
 		public void Render()
 		{
@@ -655,14 +656,14 @@ namespace FlappyPaimon
 		}
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			if(System.IO.File.Exists(System.IO.Path.GetTempFileName() + "\\" + HitName))
-				System.IO.File.Delete(System.IO.Path.GetTempFileName() + "\\" + HitName);
-			if (System.IO.File.Exists(System.IO.Path.GetTempFileName() + "\\" + PassName))
-				System.IO.File.Delete(System.IO.Path.GetTempFileName() + "\\" + PassName);
-			if (System.IO.File.Exists(System.IO.Path.GetTempFileName() + "\\" + PressName))
-				System.IO.File.Delete(System.IO.Path.GetTempFileName() + "\\" + PressName);
-			if (System.IO.File.Exists(System.IO.Path.GetTempFileName() + "\\" + BGMName))
-				System.IO.File.Delete(System.IO.Path.GetTempFileName() + "\\" + BGMName);
+			if(System.IO.File.Exists(System.IO.Path. GetTempPath() + "\\" + HitName))
+				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + HitName);
+			if (System.IO.File.Exists(System.IO.Path.GetTempPath() + "\\" + PassName))
+				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + PassName);
+			if (System.IO.File.Exists(System.IO.Path.GetTempPath() + "\\" + PressName))
+				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + PressName);
+			if (System.IO.File.Exists(System.IO.Path.GetTempPath() + "\\" + BGMName))
+				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + BGMName);
 			System.Environment.Exit(0);
 		}
 
