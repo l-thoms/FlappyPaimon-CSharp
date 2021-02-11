@@ -32,6 +32,8 @@ namespace FlappyPaimon
 				if (RestAni.IsAnimating == false) ReRest();
 			};
 			InitDevices();
+			LoadSounds();
+			PlayBGM();
 		}
 		void ReRest()
 		{
@@ -47,7 +49,8 @@ namespace FlappyPaimon
 			}
 			GC.Collect();
 		}
-		SharpDX.Direct2D1.Bitmap CloudBitmap, StoneBitmap, GroundBitmap, ForestBitmap,PNormal,PFly,TitleBitmap,PDead,TubeUpper,TubeLower,Slime0,Slime1,Slime2,YSBitmap;
+		SharpDX.Direct2D1.Bitmap CloudBitmap, StoneBitmap, GroundBitmap, ForestBitmap,PNormal,PFly,TitleBitmap,PDead,TubeUpper,TubeLower,Slime0,Slime1,Slime2,YSBitmap,
+		One,Two,Three,Four,Five,Six,Seven,Eight,Nine,Zero;
 		void LoadImage()
 		{
 			CloudBitmap = ConvertBitmap(Properties.Resources.cloud);
@@ -64,6 +67,80 @@ namespace FlappyPaimon
 			Slime1 = ConvertBitmap(Properties.Resources.slime1);
 			Slime2 = ConvertBitmap(Properties.Resources.slime2);
 			YSBitmap = ConvertBitmap(Properties.Resources.yuanshi_smaller);
+			List<System.Drawing.Bitmap> numberList = new System.Collections.Generic.List<System.Drawing.Bitmap>();
+			for (int i = 0; i < 2; i++)
+			{
+				for (int j = 0; j < 5; j++)
+				{
+					System.Drawing.Bitmap numBitmap = new System.Drawing.Bitmap(25, 40);
+					Graphics numGraphics = Graphics.FromImage(numBitmap);
+					numGraphics.DrawImage(Properties.Resources.number, -Properties.Resources.number.Width / 5 * j, -45 * i);
+					numGraphics.Dispose();
+					numberList.Add(numBitmap);
+				}
+			}
+			Three = ConvertBitmap(numberList[0]);
+			Two = ConvertBitmap(numberList[1]);
+			Six = ConvertBitmap(numberList[2]);
+			Four = ConvertBitmap(numberList[3]);
+			Zero = ConvertBitmap(numberList[4]);
+			Nine = ConvertBitmap(numberList[5]);
+			Five = ConvertBitmap(numberList[6]);
+			Eight = ConvertBitmap(numberList[7]);
+			One = ConvertBitmap(numberList[8]);
+			Seven = ConvertBitmap(numberList[9]);
+			foreach(var number in numberList)
+			{
+				number.Dispose();
+			}
+			numberList.Clear();
+		}
+
+		System.Windows.Media.MediaPlayer BGMPlayer = new System.Windows.Media.MediaPlayer();
+		System.Windows.Media.MediaPlayer PressPlayer = new System.Windows.Media.MediaPlayer();
+		System.Windows.Media.MediaPlayer PassPlayer = new System.Windows.Media.MediaPlayer();
+		System.Windows.Media.MediaPlayer HitPlayer = new System.Windows.Media.MediaPlayer();
+		string BGMName,HitName,PassName,PressName;
+		void LoadSounds()
+		{
+			Random random = new Random();
+			BGMName = HitName = PassName = PressName = "FlappyPaimon_";
+			for (int i = 0; i < 16; i++)
+			{
+				BGMName += random.Next(0, 16).ToString("X");
+				HitName += random.Next(0, 16).ToString("X");
+				PassName += random.Next(0, 16).ToString("X");
+				PressName += random.Next(0, 16).ToString("X");
+			}
+			BGMName += ".mp3";
+			HitName += ".mp3";
+			PassName += ".mp3";
+			PressName += ".mp3";
+			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + BGMName, Properties.Resources.bgm);
+			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + HitName, Properties.Resources.hit);
+			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + PassName, Properties.Resources.pass);
+			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + PressName, Properties.Resources.press);
+		}
+		void PlayBGM()
+		{
+			BGMPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + BGMName));
+			BGMPlayer.MediaEnded += (object o, EventArgs a) => { PlayBGM(); };
+			BGMPlayer.Play();
+		}
+		void PlayPress()
+		{
+			PressPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + PressName));
+			PressPlayer.Play();
+		}
+		void PlayHit()
+		{
+			HitPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + HitName));
+			HitPlayer.Play();
+		}
+		void PlayPass()
+		{
+			PassPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + PassName));
+			PassPlayer.Play();
 		}
 		THAnimations.EasyAni RestAni = new THAnimations.EasyAni() { Description = "up", From = -10, To = 10,EasingFunction = THAnimations.EasingFunction.PowerInOut,Pow=2,Duration = 0.5 };
 		System.Windows.Forms.Timer RestChecker = new System.Windows.Forms.Timer() { Interval = 1, Enabled = true };
@@ -83,7 +160,7 @@ namespace FlappyPaimon
 		int pState = 0;
 		long BeginTime = 0;
 		System.Timers.Timer pTimer = new System.Timers.Timer() { Interval = 333,Enabled = true };
-		bool EnableGPU = true;
+		int Score = 0;
 		double PLocation = 50,PRotation = 0;
 		public void Render()
 		{
@@ -136,7 +213,7 @@ namespace FlappyPaimon
 					//Draw Slime
 					foreach (var slime in Slimes)
 					{
-						SharpDX.Direct2D1.Bitmap SCurrent = new SharpDX.Direct2D1.Bitmap(IntPtr.Zero);
+						SharpDX.Direct2D1.Bitmap SCurrent = Slime0;
 						switch((UIWatch.ElapsedMilliseconds+EndWatch.ElapsedMilliseconds-slime.enterTime)/200%4)
 						{
 							case 0: case 2:SCurrent = Slime0;break;
@@ -156,7 +233,7 @@ namespace FlappyPaimon
 
 					}
 					//Draw Paimon
-					SharpDX.Direct2D1.Bitmap PCurrent = new SharpDX.Direct2D1.Bitmap(IntPtr.Zero);
+					SharpDX.Direct2D1.Bitmap PCurrent = PNormal;
 					if (pState == 0)
 						PCurrent = PNormal;
 					else if (pState == 1)
@@ -194,11 +271,39 @@ namespace FlappyPaimon
 						RenderTarget.DrawBitmap(GroundBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 5 % BG_WIDTH + bgComp, UI_HEIGHT - MAP_HEIGHT, BG_WIDTH, BG_WIDTH * GroundBitmap.Size.Height / GroundBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
 
 					}
-
+					//Draw Title
 					if (playState == 0)
 						RenderTarget.DrawBitmap(TitleBitmap, RelRectangleF((UI_WIDTH - TitleBitmap.PixelSize.Width) / 2, 128, TitleBitmap.Size.Width, TitleBitmap.Size.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 					
 					
+					//Display Score
+					int digits = 0;
+					if(Score!=0)
+						digits = (int)Math.Log10(Score);
+					if (playState != 0)
+					{
+						for (int i = digits; i >=0;i--)
+						{
+							SharpDX.Direct2D1.Bitmap numBitmap = Zero;
+							switch (Score / (int)Math.Pow(10, i) % 10)
+							{
+								case 0: numBitmap = Zero; break;
+								case 1: numBitmap = One; break;
+								case 2: numBitmap = Two; break;
+								case 3: numBitmap = Three; break;
+								case 4: numBitmap = Four; break;
+								case 5: numBitmap = Five; break;
+								case 6: numBitmap = Six; break;
+								case 7: numBitmap = Seven; break;
+								case 8: numBitmap = Eight; break;
+								case 9: numBitmap = Nine; break;
+							}
+							int numWidth = numBitmap.PixelSize.Width, numHeight = numBitmap.PixelSize.Height;
+							int numBegin = digits * numWidth;
+							RenderTarget.DrawBitmap(numBitmap, RelRectangleF((UI_WIDTH  - numBegin) / 2+ (digits- i) * numWidth, 120, numWidth, numHeight), 1, BitmapInterpolationMode.NearestNeighbor);
+						}
+					}
+
 					RenderTarget.EndDraw();
 					#endregion
 					//Logics
@@ -218,12 +323,18 @@ namespace FlappyPaimon
 						if(PLocation>=100)
 							GameOver();
 						//Hit tube
-						foreach(var tube in Tubes)
+						for(int i = Tubes.Count-1;i>=0;i--)
 						{
+							Tube tube = Tubes[i];
 							if (tube.animationX.GetValue() <= 104 && tube.animationX.GetValue() >= -104 && (tube.y - 10 > PLocation || tube.y + 10 < PLocation))
 							{
 								GameOver();AniDown();
 								break;
+							}
+							//pass
+							if(tube.isPass==false&&tube.animationX.GetValue()<0)
+							{
+								tube.isPass = true;Score++;PlayPass();
 							}
 						}
 						//Hit Slime
@@ -267,15 +378,10 @@ namespace FlappyPaimon
 		{
 			yuanshi.animationX.Stop();
 			Yuanshis.Remove(yuanshi);
+			Score += 10;
+			PlayPass();
 		}
 		int LastTime = 0;
-		[StructLayout(LayoutKind.Sequential)]
-		struct Tube
-		{
-			public double x;
-			public double y;
-			public THAnimations.EasyAni animationX;
-		}
 		[StructLayout(LayoutKind.Sequential)]
 		struct Yuanshi
 		{
@@ -293,6 +399,7 @@ namespace FlappyPaimon
 			tubeAnimation.From = UI_HEIGHT*2;tubeAnimation.To = -UI_HEIGHT*4;tubeAnimation.Pow = 1;tubeAnimation.EasingFunction = THAnimations.EasingFunction.Linear;tubeAnimation.Duration = 12;
 			Tube tube = new Tube() { x = UI_HEIGHT, y = random.NextDouble() * 60 + 20, animationX = tubeAnimation };
 			tubeAnimation.Animated = (object o, EventArgs a) => { Tubes.Remove(tube); };
+			tube.isPass = false;
 			Tubes.Add(tube);
 			THAnimations.EasyAni slimeAnimationX = new THAnimations.EasyAni()
 			{
@@ -357,6 +464,7 @@ namespace FlappyPaimon
 		}
 		void GameOver()
 		{
+			PlayHit();
 			foreach (var tube in Tubes)
 			{
 				tube.animationX.Pause();
@@ -439,6 +547,7 @@ namespace FlappyPaimon
 				RotationAni = new THAnimations.EasyAni() { From = 0, To = 30, Duration = 1, EasingFunction = THAnimations.EasingFunction.PowerIn, Pow = 2 };
 				RotationAni.Animating = (object o, EventArgs a) => { PRotation = RotationAni.GetValue(); };
 				RotationAni.Restart();
+				PlayPress();
 				GC.Collect();
 			}
 			else if(playState==2)
@@ -463,7 +572,9 @@ namespace FlappyPaimon
 				ReRest();
 				PRotation = 0;
 				playState = 0;
+				Score = 0;
 				EndWatch.Stop();EndWatch.Restart();
+				PlayBGM();
 				GC.Collect();
 			}
 		}
@@ -544,6 +655,14 @@ namespace FlappyPaimon
 		}
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
 		{
+			if(System.IO.File.Exists(System.IO.Path.GetTempFileName() + "\\" + HitName))
+				System.IO.File.Delete(System.IO.Path.GetTempFileName() + "\\" + HitName);
+			if (System.IO.File.Exists(System.IO.Path.GetTempFileName() + "\\" + PassName))
+				System.IO.File.Delete(System.IO.Path.GetTempFileName() + "\\" + PassName);
+			if (System.IO.File.Exists(System.IO.Path.GetTempFileName() + "\\" + PressName))
+				System.IO.File.Delete(System.IO.Path.GetTempFileName() + "\\" + PressName);
+			if (System.IO.File.Exists(System.IO.Path.GetTempFileName() + "\\" + BGMName))
+				System.IO.File.Delete(System.IO.Path.GetTempFileName() + "\\" + BGMName);
 			System.Environment.Exit(0);
 		}
 
@@ -568,5 +687,13 @@ namespace FlappyPaimon
 		public int direction { get; set; }
 		public THAnimations.EasyAni animationX { get; set; }
 		public THAnimations.EasyAni animationY { get; set; }
+	}
+	public class Tube
+	{
+		public Tube(){ }
+		public double x { get; set; }
+		public double y { get; set; }
+		public bool isPass { get; set; }
+		public THAnimations.EasyAni animationX { get; set; }
 	}
 }

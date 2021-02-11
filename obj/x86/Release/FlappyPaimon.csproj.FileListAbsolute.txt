@@ -1,11 +1,5 @@
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\FlappyPaimon.exe
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\FlappyPaimon.pdb
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\Microsoft.DirectX.Direct3D.dll
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\Microsoft.DirectX.Direct3DX.dll
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\Microsoft.DirectX.dll
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\Microsoft.DirectX.xml
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\Microsoft.DirectX.Direct3D.xml
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\Microsoft.DirectX.Direct3DX.xml
 L:\Develop\CS\FlappyPaimon\obj\x86\Release\FlappyPaimon.Form1.resources
 L:\Develop\CS\FlappyPaimon\obj\x86\Release\FlappyPaimon.Properties.Resources.resources
 L:\Develop\CS\FlappyPaimon\obj\x86\Release\FlappyPaimon.csproj.GenerateResource.cache
