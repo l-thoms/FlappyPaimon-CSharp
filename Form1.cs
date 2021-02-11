@@ -47,7 +47,7 @@ namespace FlappyPaimon
 			}
 			GC.Collect();
 		}
-		SharpDX.Direct2D1.Bitmap CloudBitmap, StoneBitmap, GroundBitmap, ForestBitmap,PNormal,PFly,TitleBitmap,PDead,TubeUpper,TubeLower,Slime0,Slime1,Slime2;
+		SharpDX.Direct2D1.Bitmap CloudBitmap, StoneBitmap, GroundBitmap, ForestBitmap,PNormal,PFly,TitleBitmap,PDead,TubeUpper,TubeLower,Slime0,Slime1,Slime2,YSBitmap;
 		void LoadImage()
 		{
 			CloudBitmap = ConvertBitmap(Properties.Resources.cloud);
@@ -63,6 +63,7 @@ namespace FlappyPaimon
 			Slime0 = ConvertBitmap(Properties.Resources.slime0);
 			Slime1 = ConvertBitmap(Properties.Resources.slime1);
 			Slime2 = ConvertBitmap(Properties.Resources.slime2);
+			YSBitmap = ConvertBitmap(Properties.Resources.yuanshi_smaller);
 		}
 		THAnimations.EasyAni RestAni = new THAnimations.EasyAni() { Description = "up", From = -10, To = 10,EasingFunction = THAnimations.EasingFunction.PowerInOut,Pow=2,Duration = 0.5 };
 		System.Windows.Forms.Timer RestChecker = new System.Windows.Forms.Timer() { Interval = 1, Enabled = true };
@@ -74,8 +75,9 @@ namespace FlappyPaimon
 		const int UI_HEIGHT = 768;
 		const int BG_WIDTH = 2048;
 		const int FOREST_WIDTH = 1604;
-		const int GROUND_LOCATION = 330;
+		const int GROUND_LOCATION = 333;
 		const int TOP_0 = 30;
+		const int MAP_HEIGHT = 424;
 
 		int playState = 0;
 		int pState = 0;
@@ -91,10 +93,10 @@ namespace FlappyPaimon
 					#region Direct2D
 					GameUI.BackgroundImage = null;
 					float density = (float)ClientSize.Height / UI_HEIGHT;
-					int din = (int)Math.Ceiling(density);
+					float din = (float)Math.Ceiling(density*2)/2;
 					int UI_WIDTH = (int)(ClientSize.Width / density);
 					RenderTarget.DotsPerInch = new Size2F(96*din,96*din);
-					RenderTarget.Resize(new Size2(UI_WIDTH*din, UI_HEIGHT*din));
+					RenderTarget.Resize(new Size2(Convert.ToInt32(UI_WIDTH*din),Convert.ToInt32( UI_HEIGHT*din)));
 					RenderTarget.BeginDraw();
 					RenderTarget.FillRectangle(new RawRectangleF(0, 0, UI_WIDTH, UI_HEIGHT), new SolidColorBrush(RenderTarget, ConvertColor(BackColor)));//Draw BackColor
 					
@@ -103,26 +105,33 @@ namespace FlappyPaimon
 					while (cloudComp < UI_WIDTH)
 					{
 						cloudComp += BG_WIDTH;
-						RenderTarget.DrawBitmap(CloudBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 20 % BG_WIDTH + cloudComp, UI_HEIGHT - 424, BG_WIDTH, BG_WIDTH * CloudBitmap.Size.Height / CloudBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
+						RenderTarget.DrawBitmap(CloudBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 20 % BG_WIDTH + cloudComp, UI_HEIGHT - MAP_HEIGHT, BG_WIDTH, BG_WIDTH * CloudBitmap.Size.Height / CloudBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
 					}
 
 					int forestComp = -FOREST_WIDTH;
 					while (forestComp < UI_WIDTH)
 					{
 						forestComp += FOREST_WIDTH;
-						RenderTarget.DrawBitmap(ForestBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 10 % FOREST_WIDTH + forestComp, UI_HEIGHT - 424, FOREST_WIDTH, FOREST_WIDTH * ForestBitmap.Size.Height / ForestBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
+						RenderTarget.DrawBitmap(ForestBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 10 % FOREST_WIDTH + forestComp, UI_HEIGHT - MAP_HEIGHT, FOREST_WIDTH, FOREST_WIDTH * ForestBitmap.Size.Height / ForestBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
 					}
 					//Draw Obstacle
 					foreach (var tubes in Tubes)
 					{
 						//upper
 						RenderTarget.DrawBitmap(TubeUpper, RelRectangleF((float)(tubes.animationX.GetValue() - TubeUpper.PixelSize.Width) / 2 + UI_WIDTH / 2,
-						-TubeUpper.PixelSize.Height + (float)((float)UI_HEIGHT * GROUND_LOCATION / 424 * (tubes.y) / 100) - 100+TOP_0,
+						-TubeUpper.PixelSize.Height + (float)((float)UI_HEIGHT * GROUND_LOCATION / MAP_HEIGHT * (tubes.y) / 100) - 100+TOP_0,
 						TubeUpper.PixelSize.Width, TubeUpper.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 						//lower
 						RenderTarget.DrawBitmap(TubeLower, RelRectangleF((float)(tubes.animationX.GetValue() - TubeLower.PixelSize.Width) / 2 + UI_WIDTH / 2,
-						(float)((float)UI_HEIGHT * GROUND_LOCATION / 424 * (tubes.y ) / 100) + 100+TOP_0,
+						(float)((float)UI_HEIGHT * GROUND_LOCATION / MAP_HEIGHT * (tubes.y ) / 100) + 100+TOP_0,
 						TubeLower.PixelSize.Width, TubeLower.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
+					}
+					//Draw Yuanshi
+					foreach(var yuanshi in Yuanshis)
+					{
+						RenderTarget.DrawBitmap(YSBitmap, RelRectangleF(((float)yuanshi.animationX.GetValue() - YSBitmap.PixelSize.Width + UI_WIDTH) / 2,
+						-YSBitmap.PixelSize.Height / 2 + (float)UI_HEIGHT * GROUND_LOCATION / MAP_HEIGHT * (float)yuanshi.y / 100 + TOP_0,YSBitmap.PixelSize.Width,YSBitmap.PixelSize.Height),
+						1,BitmapInterpolationMode.NearestNeighbor);
 					}
 					//Draw Slime
 					foreach (var slime in Slimes)
@@ -135,7 +144,7 @@ namespace FlappyPaimon
 							case 3:SCurrent = Slime2;break;
 						}
 						RenderTarget.DrawBitmap(SCurrent, RelRectangleF((float)(slime.animationX.GetValue() - SCurrent.PixelSize.Width) / 2 + UI_WIDTH / 2,
-						(float)((float)UI_HEIGHT * (GROUND_LOCATION+SCurrent.PixelSize.Height/4) / 424 * slime.y / 100),
+						(float)((float)UI_HEIGHT * (GROUND_LOCATION+SCurrent.PixelSize.Height/4) / MAP_HEIGHT * slime.y / 100),
 						SCurrent.PixelSize.Width, SCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 					}
 					//Draw Stone
@@ -143,7 +152,7 @@ namespace FlappyPaimon
 					while (bgComp < UI_WIDTH)
 					{
 						bgComp += BG_WIDTH;
-						RenderTarget.DrawBitmap(StoneBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 5 % BG_WIDTH + bgComp, UI_HEIGHT - 424, BG_WIDTH, BG_WIDTH * StoneBitmap.Size.Height / StoneBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
+						RenderTarget.DrawBitmap(StoneBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 5 % BG_WIDTH + bgComp, UI_HEIGHT - MAP_HEIGHT, BG_WIDTH, BG_WIDTH * StoneBitmap.Size.Height / StoneBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
 
 					}
 					//Draw Paimon
@@ -155,24 +164,24 @@ namespace FlappyPaimon
 					if (playState == 0)
 					{
 						RenderTarget.DrawBitmap(PCurrent, RelRectangleF((UI_WIDTH - PCurrent.PixelSize.Width) / 2,
-						(float)((UI_HEIGHT - PCurrent.PixelSize.Height) / 2 * (GROUND_LOCATION / 424f) + RestAni.GetValue()+TOP_0)
+						(float)((UI_HEIGHT - PCurrent.PixelSize.Height) / 2 * (GROUND_LOCATION / (float)MAP_HEIGHT) + RestAni.GetValue()+TOP_0)
 						, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 					}
 					else
 					{
 						RawMatrix3x2 oldMatrix = RenderTarget.Transform;
 						RenderTarget.Transform = ConvertMatrix(Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
-						UI_WIDTH / 2, (float)(UI_HEIGHT * (PLocation / 100) * (GROUND_LOCATION / 424f))+TOP_0)));
+						UI_WIDTH / 2, (float)(UI_HEIGHT * (PLocation / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT))+TOP_0)));
 						if (playState == 1)
 							RenderTarget.DrawBitmap(PCurrent, RelRectangleF((UI_WIDTH - PCurrent.PixelSize.Width) / 2,
-							(float)(UI_HEIGHT * (PLocation / 100) * (GROUND_LOCATION / 424f)) - PCurrent.PixelSize.Height / 2 + TOP_0, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
+							(float)(UI_HEIGHT * (PLocation / 100) * (GROUND_LOCATION /(float)MAP_HEIGHT)) - PCurrent.PixelSize.Height / 2 + TOP_0, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 						else
 						{
 							PCurrent = PDead;
 							RenderTarget.Transform = ConvertMatrix(Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
-							UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / 424f))+TOP_0)));
+							UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT))+TOP_0)));
 							RenderTarget.DrawBitmap(PCurrent, RelRectangleF((UI_WIDTH - PCurrent.PixelSize.Width) / 2,
-						  (float)((UI_HEIGHT) * (GameAni.GetValue() / 100) * (GROUND_LOCATION / 424f)) - PCurrent.PixelSize.Height / 2 + TOP_0, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
+						  (float)((UI_HEIGHT) * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) - PCurrent.PixelSize.Height / 2 + TOP_0, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 						}
 						RenderTarget.Transform = oldMatrix;
 					}
@@ -182,7 +191,7 @@ namespace FlappyPaimon
 					while (bgComp < UI_WIDTH)
 					{
 						bgComp += BG_WIDTH;
-						RenderTarget.DrawBitmap(GroundBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 5 % BG_WIDTH + bgComp, UI_HEIGHT - 424, BG_WIDTH, BG_WIDTH * GroundBitmap.Size.Height / GroundBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
+						RenderTarget.DrawBitmap(GroundBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 5 % BG_WIDTH + bgComp, UI_HEIGHT - MAP_HEIGHT, BG_WIDTH, BG_WIDTH * GroundBitmap.Size.Height / GroundBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
 
 					}
 
@@ -228,6 +237,16 @@ namespace FlappyPaimon
 								}
 							}
 						}
+						//Hit Yuanshi
+						{
+							foreach(var yuanshi in Yuanshis)
+							{
+								if (yuanshi.animationX.GetValue() <= 96 && yuanshi.animationX.GetValue() >= -96 && PLocation > yuanshi.y - 8 && PLocation < yuanshi.y + 8)
+								{
+									GetYuanshi(yuanshi);break;
+								}
+							}
+						}
 					}
 					//Control Slime
 					foreach (var slime in Slimes)
@@ -243,6 +262,11 @@ namespace FlappyPaimon
 			}
 			catch {; }
 			if (this.WindowState == FormWindowState.Minimized) System.Threading.Thread.Sleep(1);
+		}
+		void GetYuanshi(Yuanshi yuanshi)
+		{
+			yuanshi.animationX.Stop();
+			Yuanshis.Remove(yuanshi);
 		}
 		int LastTime = 0;
 		[StructLayout(LayoutKind.Sequential)]
@@ -272,9 +296,9 @@ namespace FlappyPaimon
 			Tubes.Add(tube);
 			THAnimations.EasyAni slimeAnimationX = new THAnimations.EasyAni()
 			{
-				From = UI_HEIGHT * 2 + 384, To = -UI_HEIGHT * 4 + 384,Pow=1,EasingFunction = THAnimations.EasingFunction.Linear,Duration = 12
+				From = UI_HEIGHT * 2 + UI_HEIGHT/2, To = -UI_HEIGHT * 4 + UI_HEIGHT/2,Pow=1,EasingFunction = THAnimations.EasingFunction.Linear,Duration = 12
 			};
-			Slime slime = new Slime() { x = UI_HEIGHT * 2 + 384, y = random.NextDouble() * 80 + 10, enterTime = UIWatch.ElapsedMilliseconds, 
+			Slime slime = new Slime() { x = UI_HEIGHT * 2 + UI_HEIGHT/2, y = random.NextDouble() * 80 + 10, enterTime = UIWatch.ElapsedMilliseconds, 
 			animationX = slimeAnimationX,direction = Convert.ToInt32(random.NextDouble()) };//
 			slimeAnimationX.Animated = (object o, EventArgs a) =>
 			{
@@ -286,6 +310,26 @@ namespace FlappyPaimon
 			slimeAnimationX.Restart();
 			RegestryAnimationY(slime);
 			Slimes.Add(slime);
+			int yuanshiNum = Convert.ToInt32(random.NextDouble());
+			if(yuanshiNum==0)
+			{
+				Yuanshi yuanshi = new Yuanshi() { y = random.NextDouble() * 80 + 10 };
+				THAnimations.EasyAni yuanshiAnimationX = new THAnimations.EasyAni()
+				{
+					From = UI_HEIGHT * 2 + UI_HEIGHT / 2,
+					To = -UI_HEIGHT * 4 + UI_HEIGHT / 2,
+					Pow = 1,
+					EasingFunction = THAnimations.EasingFunction.Linear,
+					Duration = 12
+				};
+				yuanshi.animationX = yuanshiAnimationX;
+				yuanshiAnimationX.Animated = (object o, EventArgs a) =>
+				{
+					Yuanshis.Remove(yuanshi);
+				};
+				yuanshiAnimationX.Start();
+				Yuanshis.Add(yuanshi);
+			}
 		}
 		void RegestryAnimationY(Slime slime)
 		{
@@ -335,6 +379,12 @@ namespace FlappyPaimon
 		{
 			return new RawRectangleF(x, y, w + x, h + y);
 		}
+
+		private void Form1_Resize(object sender, EventArgs e)
+		{
+			//Render();
+		}
+
 		private RawMatrix3x2 ConvertMatrix(Matrix3x2 src)
 		{
 			return new RawMatrix3x2(src.M11, src.M12, src.M21, src.M22, src.M31, src.M32);
@@ -386,7 +436,7 @@ namespace FlappyPaimon
 					PLocation = GameAni.GetValue();
 				};
 				GameAni.Restart();
-				RotationAni = new THAnimations.EasyAni() { From = 0, To = 22.5, Duration = 1, EasingFunction = THAnimations.EasingFunction.PowerIn, Pow = 2 };
+				RotationAni = new THAnimations.EasyAni() { From = 0, To = 30, Duration = 1, EasingFunction = THAnimations.EasingFunction.PowerIn, Pow = 2 };
 				RotationAni.Animating = (object o, EventArgs a) => { PRotation = RotationAni.GetValue(); };
 				RotationAni.Restart();
 				GC.Collect();

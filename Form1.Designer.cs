@@ -40,8 +40,7 @@
 			this.GameUI.Name = "GameUI";
 			this.GameUI.Size = new System.Drawing.Size(800, 450);
 			this.GameUI.TabIndex = 0;
-			this.GameUI.MouseClick += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
-			this.GameUI.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
+			this.GameUI.MouseDown += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
 			// 
 			// Form1
 			// 
@@ -59,6 +58,7 @@
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+			this.Resize += new System.EventHandler(this.Form1_Resize);
 			this.ResumeLayout(false);
 
 		}
