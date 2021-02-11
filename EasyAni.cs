@@ -10,7 +10,7 @@ namespace THAnimations
 	{
 		Linear, PowerIn, PowerOut, PowerInOut, SineIn, SineOut, SineInOut
 	}
-	class EasyAni
+	public class EasyAni
 	{
 		public EasingFunction EasingFunction { get; set; }
 		public double Pow { get; set; }

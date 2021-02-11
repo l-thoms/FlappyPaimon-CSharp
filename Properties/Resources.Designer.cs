@@ -141,6 +141,46 @@ namespace FlappyPaimon.Properties {
         }
         
         /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap particle1 {
+            get {
+                object obj = ResourceManager.GetObject("particle1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap particle2 {
+            get {
+                object obj = ResourceManager.GetObject("particle2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap particle3 {
+            get {
+                object obj = ResourceManager.GetObject("particle3", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap particle4 {
+            get {
+                object obj = ResourceManager.GetObject("particle4", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
         internal static byte[] pass {
@@ -193,9 +233,9 @@ namespace FlappyPaimon.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        internal static System.Drawing.Bitmap slime {
+        internal static System.Drawing.Bitmap slime0 {
             get {
-                object obj = ResourceManager.GetObject("slime", resourceCulture);
+                object obj = ResourceManager.GetObject("slime0", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -203,9 +243,9 @@ namespace FlappyPaimon.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        internal static System.Drawing.Bitmap slime0 {
+        internal static System.Drawing.Bitmap slime1 {
             get {
-                object obj = ResourceManager.GetObject("slime0", resourceCulture);
+                object obj = ResourceManager.GetObject("slime1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
