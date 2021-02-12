@@ -103,6 +103,18 @@ namespace FlappyPaimon
 		string BGMName,HitName,PassName,PressName;
 		void LoadSounds()
 		{
+			//Delete old
+			var p = Process.GetProcessesByName(System.IO.Path.GetFileNameWithoutExtension(Application.ExecutablePath));
+			System.IO.FileInfo[] fi = new System.IO.DirectoryInfo(System.IO.Path.GetTempPath()).GetFiles("FlappyPaimon_*.mp3");
+
+			if(p.Length<=1)
+			{
+				foreach(var f in fi)
+				{
+					f.Delete();
+				}
+			}
+			//Generate file
 			Random random = new Random();
 			BGMName = HitName = PassName = PressName = "FlappyPaimon_";
 			for (int i = 0; i < 16; i++)
