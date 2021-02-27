@@ -70,8 +70,6 @@ namespace THAnimations
 		public double GetValue()
 		{
 			double current = 0;
-			if(IsAnimating)
-			AniTimer_Tick(null, new EventArgs());
 			switch(EasingFunction)
 			{
 				default:

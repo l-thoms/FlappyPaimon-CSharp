@@ -93,6 +93,16 @@ namespace FlappyPaimon.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap DisableSound {
+            get {
+                object obj = ResourceManager.GetObject("DisableSound", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap distance {
             get {
                 object obj = ResourceManager.GetObject("distance", resourceCulture);
@@ -106,6 +116,16 @@ namespace FlappyPaimon.Properties {
         internal static System.Drawing.Bitmap forest {
             get {
                 object obj = ResourceManager.GetObject("forest", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap Fullscreen {
+            get {
+                object obj = ResourceManager.GetObject("Fullscreen", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -266,6 +286,16 @@ namespace FlappyPaimon.Properties {
         internal static System.Drawing.Bitmap smoke {
             get {
                 object obj = ResourceManager.GetObject("smoke", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap Sound {
+            get {
+                object obj = ResourceManager.GetObject("Sound", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

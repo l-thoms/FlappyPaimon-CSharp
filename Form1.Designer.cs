@@ -41,6 +41,7 @@
 			this.GameUI.Size = new System.Drawing.Size(800, 450);
 			this.GameUI.TabIndex = 0;
 			this.GameUI.MouseDown += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
+			this.GameUI.MouseMove += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseMove);
 			// 
 			// Form1
 			// 

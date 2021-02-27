@@ -20,7 +20,8 @@ namespace FlappyPaimon
 			InitializeComponent();
 			UIWatch.Start();
 			this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
-			ClientSize = new Size(1024, 768);
+			float DPI = this.CreateGraphics().DpiX/96f;
+			ClientSize = new Size(Convert.ToInt32(1024*DPI), Convert.ToInt32(768*DPI));
 			pTimer.Elapsed += PTimer_Tick;
 			RestAni.Animated = (object o, EventArgs a) => {
 				ReRest();
@@ -50,7 +51,7 @@ namespace FlappyPaimon
 			GC.Collect();
 		}
 		SharpDX.Direct2D1.Bitmap CloudBitmap, StoneBitmap, GroundBitmap, ForestBitmap,PNormal,PFly,TitleBitmap,PDead,TubeUpper,TubeLower,Slime0,Slime1,Slime2,YSBitmap,
-		One,Two,Three,Four,Five,Six,Seven,Eight,Nine,Zero;
+		One,Two,Three,Four,Five,Six,Seven,Eight,Nine,Zero,FSBitmap,Sound,DisableSound;
 		void LoadImage()
 		{
 			CloudBitmap = ConvertBitmap(Properties.Resources.cloud);
@@ -94,12 +95,15 @@ namespace FlappyPaimon
 				number.Dispose();
 			}
 			numberList.Clear();
+			FSBitmap = ConvertBitmap(Properties.Resources.Fullscreen);
+			Sound = ConvertBitmap(Properties.Resources.Sound);
+			DisableSound = ConvertBitmap(Properties.Resources.DisableSound);
 		}
-
-		System.Windows.Media.MediaPlayer BGMPlayer = new System.Windows.Media.MediaPlayer();
-		System.Windows.Media.MediaPlayer PressPlayer = new System.Windows.Media.MediaPlayer();
-		System.Windows.Media.MediaPlayer PassPlayer = new System.Windows.Media.MediaPlayer();
-		System.Windows.Media.MediaPlayer HitPlayer = new System.Windows.Media.MediaPlayer();
+		bool isPlaySound = true;
+		System.Windows.Media.MediaPlayer BGMPlayer = new System.Windows.Media.MediaPlayer()  {Volume=1};
+		System.Windows.Media.MediaPlayer PressPlayer = new System.Windows.Media.MediaPlayer(){Volume=1};
+		System.Windows.Media.MediaPlayer PassPlayer = new System.Windows.Media.MediaPlayer() {Volume=1};
+		System.Windows.Media.MediaPlayer HitPlayer = new System.Windows.Media.MediaPlayer() { Volume = 1 };
 		string BGMName,HitName,PassName,PressName;
 		void LoadSounds()
 		{
@@ -132,11 +136,11 @@ namespace FlappyPaimon
 			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + HitName, Properties.Resources.hit);
 			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + PassName, Properties.Resources.pass);
 			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + PressName, Properties.Resources.press);
+			BGMPlayer.MediaEnded += (object o, EventArgs a) => { PlayBGM(); };
 		}
 		void PlayBGM()
 		{
 			BGMPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + BGMName));
-			BGMPlayer.MediaEnded += (object o, EventArgs a) => { PlayBGM(); };
 			BGMPlayer.Play();
 		}
 		void PlayPress()
@@ -162,6 +166,7 @@ namespace FlappyPaimon
 		}
 
 		const int UI_HEIGHT = 768;
+		int UI_WIDTH = 1024;
 		const int BG_WIDTH = 2048;
 		const int FOREST_WIDTH = 1604;
 		const int GROUND_LOCATION = 333;
@@ -175,16 +180,87 @@ namespace FlappyPaimon
 		int Score = 0;
 
 		double PLocation = 50,PRotation = 0;
+
+		Point MouseAbsolute = new Point();
+		private void GameUI_MouseMove(object sender, MouseEventArgs e)
+		{
+			MouseAbsolute = e.Location;
+		}
+
 		public void Render()
 		{
 			try
 			{
 				{
+					#region Logics
+					if (playState == 1)
+					{
+						if (LastTime != (UIWatch.ElapsedMilliseconds - BeginTime) / 2000)
+							AddObstacle();
+						LastTime = (int)(UIWatch.ElapsedMilliseconds - BeginTime) / 2000;
+						if (PLocation < 0)
+						{
+							GameAni.Stop();
+							PLocation = 0;
+							AniDown();
+
+						}
+						//Hit ground
+						if(PLocation>=100)
+							GameOver();
+						//Hit tube
+						for(int i = Tubes.Count-1;i>=0;i--)
+						{
+							Tube tube = Tubes[i];
+							if (tube.animationX.GetValue() <= 104 && tube.animationX.GetValue() >= -104 && (tube.y - 10 > PLocation || tube.y + 10 < PLocation))
+							{
+								GameOver();AniDown();
+								break;
+							}
+							//pass
+							if(tube.isPass==false&&tube.animationX.GetValue()<0)
+							{
+								tube.isPass = true;Score++;PlayPass();
+							}
+						}
+						//Hit Slime
+						{
+							foreach (var slime in Slimes)
+							{
+								if (slime.animationX.GetValue()<=128&& slime.animationX.GetValue() >= -128&&PLocation>slime.y-9&&PLocation<slime.y+9)
+								{
+									GameOver(); AniDown();
+									break;
+								}
+							}
+						}
+						//Hit Yuanshi
+						{
+							foreach(var yuanshi in Yuanshis)
+							{
+								if (yuanshi.animationX.GetValue() <= 96 && yuanshi.animationX.GetValue() >= -96 && PLocation > yuanshi.y - 8 && PLocation < yuanshi.y + 8)
+								{
+									GetYuanshi(yuanshi);break;
+								}
+							}
+						}
+					}
+					//Control Slime
+					foreach (var slime in Slimes)
+					{
+						if (!slime.animationY.IsAnimating&&playState!=0)
+							RegestryAnimationY(slime);
+					}
+					if (playState==2)
+					{
+						if(GameAni.GetValue()>=100)RotationAni.Stop();
+					}
+					#endregion
 					#region Direct2D
 					GameUI.BackgroundImage = null;
 					float density = (float)ClientSize.Height / UI_HEIGHT;
 					float din = (float)Math.Ceiling(density*2)/2;
-					int UI_WIDTH = (int)(ClientSize.Width / density);
+					UI_WIDTH = (int)(ClientSize.Width / density);
 					RenderTarget.DotsPerInch = new Size2F(96*din,96*din);
 					RenderTarget.Resize(new Size2(Convert.ToInt32(UI_WIDTH*din),Convert.ToInt32( UI_HEIGHT*din)));
 					RenderTarget.BeginDraw();
@@ -286,7 +362,7 @@ namespace FlappyPaimon
 					}
 					//Draw Title
 					if (playState == 0)
-						RenderTarget.DrawBitmap(TitleBitmap, RelRectangleF((UI_WIDTH - TitleBitmap.PixelSize.Width) / 2, 128, TitleBitmap.Size.Width, TitleBitmap.Size.Height), 1, BitmapInterpolationMode.NearestNeighbor);
+						RenderTarget.DrawBitmap(TitleBitmap, RelRectangleF((UI_WIDTH - TitleBitmap.PixelSize.Width) / 2, 128, TitleBitmap.PixelSize.Width, TitleBitmap.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 					
 					
 					//Display Score
@@ -316,77 +392,45 @@ namespace FlappyPaimon
 							RenderTarget.DrawBitmap(numBitmap, RelRectangleF((UI_WIDTH  - numBegin) / 2+ (digits- i) * numWidth, 120, numWidth, numHeight), 1, BitmapInterpolationMode.NearestNeighbor);
 						}
 					}
-
+					//Draw Buttons
+					MouseRelative = new Point(Convert.ToInt32(MouseAbsolute.X / (float)ClientSize.Width * UI_WIDTH), Convert.ToInt32(MouseAbsolute.Y / (float)ClientSize.Height * UI_HEIGHT));
+					IsFSMouseOver = false;
+					if (playState == 0)
+					{
+						if (MouseRelative.X >= UI_WIDTH - 54 && MouseRelative.X < UI_WIDTH - 6 && MouseRelative.Y >= 6 && MouseRelative.Y < 54)
+							IsFSMouseOver = true;
+						else IsFSMouseOver = false;
+						if (!IsFSMouseOver)
+							RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6, 48, 48), 1, BitmapInterpolationMode.Linear);
+						else
+							RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6, 48, 48), 0.5f, BitmapInterpolationMode.Linear);
+						if (MouseRelative.X >= UI_WIDTH - 54-54 && MouseRelative.X < UI_WIDTH - 6-54 && MouseRelative.Y >= 6 && MouseRelative.Y < 54)
+						{
+							if(isPlaySound)
+								RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48-54 - 6, 6, 48, 48), 0.5f, BitmapInterpolationMode.Linear);
+							else
+								RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6, 48, 48), 0.5f, BitmapInterpolationMode.Linear);
+						}
+						else
+						{
+							if (isPlaySound)
+								RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6, 48, 48), 1, BitmapInterpolationMode.Linear);
+							else
+								RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6, 48, 48), 1, BitmapInterpolationMode.Linear);
+						}
+					}
 					RenderTarget.EndDraw();
 					#endregion
-					//Logics
-					if (playState == 1)
-					{
-						if (LastTime != (UIWatch.ElapsedMilliseconds - BeginTime) / 2000)
-							AddObstacle();
-						LastTime = (int)(UIWatch.ElapsedMilliseconds - BeginTime) / 2000;
-						if (PLocation < 0)
-						{
-							GameAni.Stop();
-							PLocation = 0;
-							AniDown();
-
-						}
-						//Hit ground
-						if(PLocation>=100)
-							GameOver();
-						//Hit tube
-						for(int i = Tubes.Count-1;i>=0;i--)
-						{
-							Tube tube = Tubes[i];
-							if (tube.animationX.GetValue() <= 104 && tube.animationX.GetValue() >= -104 && (tube.y - 10 > PLocation || tube.y + 10 < PLocation))
-							{
-								GameOver();AniDown();
-								break;
-							}
-							//pass
-							if(tube.isPass==false&&tube.animationX.GetValue()<0)
-							{
-								tube.isPass = true;Score++;PlayPass();
-							}
-						}
-						//Hit Slime
-						{
-							foreach (var slime in Slimes)
-							{
-								if (slime.animationX.GetValue()<=128&& slime.animationX.GetValue() >= -128&&PLocation>slime.y-9&&PLocation<slime.y+9)
-								{
-									GameOver(); AniDown();
-									break;
-								}
-							}
-						}
-						//Hit Yuanshi
-						{
-							foreach(var yuanshi in Yuanshis)
-							{
-								if (yuanshi.animationX.GetValue() <= 96 && yuanshi.animationX.GetValue() >= -96 && PLocation > yuanshi.y - 8 && PLocation < yuanshi.y + 8)
-								{
-									GetYuanshi(yuanshi);break;
-								}
-							}
-						}
-					}
-					//Control Slime
-					foreach (var slime in Slimes)
-					{
-						if (!slime.animationY.IsAnimating&&playState!=0)
-							RegestryAnimationY(slime);
-					}
-					if (playState==2)
-					{
-						if(GameAni.GetValue()>=100)RotationAni.Stop();
-					}
 				}
 			}
-			catch {; }
+			catch(Exception e)
+			{
+				GameUI.CreateGraphics().DrawString(e.Message, new Font("", 12), new SolidBrush(Color.Black), new Point());
+			}
 			if (this.WindowState == FormWindowState.Minimized) System.Threading.Thread.Sleep(1);
 		}
+		Point MouseRelative = new Point();
+		bool IsFSMouseOver = false;
 		void GetYuanshi(Yuanshi yuanshi)
 		{
 			yuanshi.animationX.Stop();
@@ -510,8 +554,69 @@ namespace FlappyPaimon
 		{
 			return new RawMatrix3x2(src.M11, src.M12, src.M21, src.M22, src.M31, src.M32);
 		}
+		bool isFullScreen = false,allowState = true;
+		FormWindowState rState;
+		protected override void WndProc(ref Message m)
+		{
+			var ustate = this.WindowState;
+			base.WndProc(ref m);
+			if(ustate!=this.WindowState&&isFullScreen&&allowState)
+			{
+				IsFSMouseOver = true;
+				GameUI_MouseClick(null, new MouseEventArgs(MouseButtons.Left,0,0,0,0));
+			}
+		}
 		private void GameUI_MouseClick(object sender, MouseEventArgs e)
 		{
+			if(IsFSMouseOver)
+			{
+				if(!isFullScreen)
+				{
+					rState = this.WindowState;
+					if (this.WindowState == FormWindowState.Maximized)
+					{
+						this.FormBorderStyle = FormBorderStyle.None;
+						this.WindowState = FormWindowState.Normal;
+					}
+					else
+					{
+						this.WindowState = FormWindowState.Maximized;
+						this.FormBorderStyle = FormBorderStyle.None;
+						this.WindowState = FormWindowState.Normal;
+						this.WindowState = FormWindowState.Maximized;
+					}
+					this.WindowState = FormWindowState.Maximized;
+					isFullScreen = true;
+				}
+				else
+				{
+					allowState = false;
+					this.FormBorderStyle = FormBorderStyle.Sizable;
+					this.WindowState = rState;
+					isFullScreen = false;
+					allowState = true;
+				}
+				return;
+			}
+			if (MouseRelative.X >= UI_WIDTH - 54 - 54 && MouseRelative.X < UI_WIDTH - 6 - 54 && MouseRelative.Y >= 6 && MouseRelative.Y < 54&&playState ==0)
+			{
+				if(isPlaySound)
+				{
+					BGMPlayer.IsMuted = true;
+					HitPlayer.IsMuted = true;
+					PassPlayer.IsMuted = true;
+					PressPlayer.IsMuted = true;
+				}
+				else
+				{
+					BGMPlayer.IsMuted = false;
+					HitPlayer.IsMuted = false;
+					PassPlayer.IsMuted = false;
+					PressPlayer.IsMuted = false;
+				}
+				isPlaySound = !isPlaySound;
+				return;
+			}
 			Press(sender, e);
 		}
 		THAnimations.EasyAni GameAni;
@@ -625,9 +730,10 @@ namespace FlappyPaimon
 		{
 			return new RawColor4((float)source.R / 255, (float)source.G / 255, (float)source.B / 255, (float)source.A / 255);
 		}
+		Factory factory = null;
 		void InitDevices()
 		{
-			Factory factory = new Factory(FactoryType.SingleThreaded);
+			factory = new Factory(FactoryType.SingleThreaded);
 			RenderTargetProperties properties = new RenderTargetProperties()
 			{
 				PixelFormat =new PixelFormat(),
@@ -668,7 +774,11 @@ namespace FlappyPaimon
 		}
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			if(System.IO.File.Exists(System.IO.Path. GetTempPath() + "\\" + HitName))
+			GameUI.CreateGraphics().DrawString("Application is closing. Please wait...", new Font("", 12), new SolidBrush(Color.Black), new Point());
+			BGMPlayer.Stop();
+			HitPlayer.Stop();
+			PassPlayer.Stop();
+			if (System.IO.File.Exists(System.IO.Path. GetTempPath() + "\\" + HitName))
 				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + HitName);
 			if (System.IO.File.Exists(System.IO.Path.GetTempPath() + "\\" + PassName))
 				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + PassName);

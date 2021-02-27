@@ -8,15 +8,9 @@ L:\Develop\CS\FlappyPaimon\obj\x86\Release\FlappyPaimon.csproj.CopyComplete
 L:\Develop\CS\FlappyPaimon\obj\x86\Release\FlappyPaimon.exe
 L:\Develop\CS\FlappyPaimon\obj\x86\Release\FlappyPaimon.pdb
 L:\Develop\CS\FlappyPaimon\obj\x86\Release\FlappyPaimon.csprojAssemblyReference.cache
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Direct2D1.dll
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.dll
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.DXGI.dll
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.pdb
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Direct2D1.pdb
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Direct2D1.xml
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.DXGI.pdb
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.DXGI.xml
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Desktop.dll
-L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Desktop.pdb
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\SharpDX.Desktop.xml
 L:\Develop\CS\FlappyPaimon\bin\x86\Release\FlappyPaimon.exe.config
+L:\Develop\CS\FlappyPaimon\bin\x86\Release\System.Diagnostics.DiagnosticSource.xml
+L:\Develop\CS\FlappyPaimon\obj\x86\Release\FlappyPaimon.csproj.Fody.CopyLocal.cache
