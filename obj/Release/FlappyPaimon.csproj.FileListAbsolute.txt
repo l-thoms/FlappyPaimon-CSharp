@@ -7,10 +7,11 @@ L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.csproj.GenerateResource.cach
 L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.csproj.CoreCompileInputs.cache
 L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.exe
 L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.pdb
-L:\Develop\CS\FlappyPaimon\bin\Release\Microsoft.DirectX.Direct3D.dll
-L:\Develop\CS\FlappyPaimon\bin\Release\Microsoft.DirectX.Direct3DX.dll
-L:\Develop\CS\FlappyPaimon\bin\Release\Microsoft.DirectX.dll
-L:\Develop\CS\FlappyPaimon\bin\Release\Microsoft.DirectX.xml
-L:\Develop\CS\FlappyPaimon\bin\Release\Microsoft.DirectX.Direct3D.xml
-L:\Develop\CS\FlappyPaimon\bin\Release\Microsoft.DirectX.Direct3DX.xml
 L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.csproj.CopyComplete
+L:\Develop\CS\FlappyPaimon\bin\Release\FlappyPaimon.exe.config
+L:\Develop\CS\FlappyPaimon\bin\Release\SharpDX.Desktop.xml
+L:\Develop\CS\FlappyPaimon\bin\Release\SharpDX.Direct2D1.xml
+L:\Develop\CS\FlappyPaimon\bin\Release\SharpDX.DXGI.xml
+L:\Develop\CS\FlappyPaimon\bin\Release\System.Diagnostics.DiagnosticSource.xml
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.csproj.Fody.CopyLocal.cache
+L:\Develop\CS\FlappyPaimon\bin\Release\SharpGL.xml

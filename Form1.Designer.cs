@@ -29,28 +29,15 @@
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-			this.GameUI = new FlappyPaimon.BufferedPanel();
 			this.SuspendLayout();
-			// 
-			// GameUI
-			// 
-			this.GameUI.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-			this.GameUI.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.GameUI.Location = new System.Drawing.Point(0, 0);
-			this.GameUI.Name = "GameUI";
-			this.GameUI.Size = new System.Drawing.Size(800, 450);
-			this.GameUI.TabIndex = 0;
-			this.GameUI.MouseDown += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
-			this.GameUI.MouseMove += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseMove);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(97)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
+			this.BackColor = System.Drawing.Color.White;
 			this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.ClientSize = new System.Drawing.Size(800, 450);
-			this.Controls.Add(this.GameUI);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.KeyPreview = true;
 			this.MinimumSize = new System.Drawing.Size(320, 240);
@@ -60,14 +47,14 @@
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
+			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseMove);
 			this.Resize += new System.EventHandler(this.Form1_Resize);
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
-
-		public BufferedPanel GameUI;
 	}
 }
 
