@@ -19,6 +19,7 @@ namespace FlappyPaimon
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetDC(IntPtr hwnd);
 		long GameTime;
+		bool isLoaded = false;
 		public Form1()
 		{
 			GameUI = this;
@@ -515,8 +516,9 @@ namespace FlappyPaimon
 						RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.Linear);
 				}
 			RenderTarget.EndDraw();
+			if (!isLoaded) { UIWatch.Restart(); isLoaded = true; }
 			#endregion
-			
+
 		}
 		float GetEnterAni()
 		{
@@ -721,6 +723,7 @@ namespace FlappyPaimon
 				cg.DrawImage(renderBitmap, 0, 0, ClientSize.Width, ClientSize.Height);
 				bGraphics.Dispose();
 				renderBitmap.Dispose();
+				if (!isLoaded) { UIWatch.Restart(); isLoaded = true; }
 			}
 		}
 		System.Drawing.Imaging.ImageAttributes SetOpacity(float opacity)
