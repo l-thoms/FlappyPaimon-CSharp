@@ -215,7 +215,8 @@ namespace FlappyPaimon
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			if(RCThread.IsAlive)RCThread.Abort();
-			RenderCompatible(e.Graphics);
+			if (RCThread.IsAlive) RCThread.Join();
+				RenderCompatible(e.Graphics);
 		}
 		public void Render()
 		{
@@ -301,10 +302,7 @@ namespace FlappyPaimon
 				{
 					try
 					{
-						if (!RCThread.IsAlive)
-						{
-							RCThread = new System.Threading.Thread(new System.Threading.ThreadStart(CompatibleLoop)); RCThread.Start();
-						}
+						UseCompatibleMode = true; return;
 					}
 					catch (Exception e)
 					{
@@ -557,7 +555,7 @@ namespace FlappyPaimon
 		System.Threading.Thread RCThread;
 		public void RenderCompatible(Graphics g)
 		{
-			GameUI.BackgroundImage = null;
+			if (!isLoaded) return;
 			float density = (float)ClientSize.Height / UI_HEIGHT;
 			float din = (float)Math.Ceiling(density * 2) / 2;
 			UI_WIDTH = (int)(ClientSize.Width / density);
@@ -984,7 +982,7 @@ namespace FlappyPaimon
 					PLocation = GameAni.GetValue();
 				};
 				GameAni.Restart();
-				RotationAni = new THAnimations.EasyAni() { From = 0, To = 30, Duration = 1, EasingFunction = THAnimations.EasingFunction.PowerIn, Pow = 2 };
+				RotationAni = new THAnimations.EasyAni() { From = -2, To = 118, Duration = 2, EasingFunction = THAnimations.EasingFunction.PowerIn, Pow = 2 };
 				RotationAni.Animating = (object o, EventArgs a) => { PRotation = RotationAni.GetValue(); };
 				RotationAni.Restart();
 				PlayPress();
@@ -1046,10 +1044,16 @@ namespace FlappyPaimon
 		}
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
+			if(e.KeyCode==Keys.F11){ FullScreen();return; }
+			if(e.KeyCode==Keys.F12) { System.Diagnostics.Process.Start("https://g.evkgame.cn/214101"); return; }
 			if (e.Alt || e.Control || e.Shift || e.KeyCode == Keys.LWin || e.KeyCode == Keys.RWin) return;
 			Press(sender, e);
 		}
-
+		protected override void OnMouseWheel(MouseEventArgs e)
+		{
+			base.OnMouseWheel(e);
+			if (e.Delta > 0&&playState!=2) Press(null, new EventArgs());
+		}
 		WindowRenderTarget RenderTarget;
 		RawColor4 ConvertColor(Color source)
 		{
