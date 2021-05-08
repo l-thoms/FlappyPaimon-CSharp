@@ -62,7 +62,7 @@ namespace FlappyPaimon
 			GC.Collect();
 		}
 		SharpDX.Direct2D1.Bitmap CloudBitmap, StoneBitmap, GroundBitmap, ForestBitmap, PNormal, PFly, TitleBitmap, PDead, TubeUpper, TubeLower, Slime0, Slime1, Slime2, YSBitmap,
-		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero, FSBitmap, Sound, DisableSound;
+		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero, FSBitmap, Sound, DisableSound,SDX,FPS,GDI;
 		System.Drawing.Bitmap GZero, GOne, GTwo, GThree, GFour, GFive, GSix, GSeven, GEight, GNine;
 		void LoadImage()
 		{
@@ -117,6 +117,9 @@ namespace FlappyPaimon
 			FSBitmap = ConvertBitmap(Properties.Resources.Fullscreen);
 			Sound = ConvertBitmap(Properties.Resources.Sound);
 			DisableSound = ConvertBitmap(Properties.Resources.DisableSound);
+			SDX = ConvertBitmap(Properties.Resources.SDX);
+			FPS = ConvertBitmap(Properties.Resources.FPS);
+			GDI = ConvertBitmap(Properties.Resources.GDI);
 		}
 		bool isPlaySound = true;
 		System.Windows.Media.MediaPlayer BGMPlayer = new System.Windows.Media.MediaPlayer() { Volume = 1 };
@@ -202,6 +205,8 @@ namespace FlappyPaimon
 		double PLocation = 50, PRotation = 0;
 
 		Point MouseAbsolute = new Point();
+		int EnterPosition=0;
+		int TouchIndex = 0;
 		private void GameUI_MouseMove(object sender, MouseEventArgs e)
 		{
 			MouseAbsolute = e.Location;
@@ -210,6 +215,15 @@ namespace FlappyPaimon
 			if (MouseRelative.X >= UI_WIDTH - 54 && MouseRelative.X < UI_WIDTH - 6 && MouseRelative.Y >= 6 && MouseRelative.Y < 54)
 				IsFSMouseOver = true;
 			else IsFSMouseOver = false;
+			if(e.Button==MouseButtons.Left&&CanSetTouch&&playState!=2)
+			{
+				int tempIndex = (EnterPosition-MouseRelative.Y ) / 30;
+				if(tempIndex>TouchIndex)
+				{
+					Press(sender, e);
+					TouchIndex = tempIndex;
+				}
+			}
 		}
 		bool UseCompatibleMode = false;
 		protected override void OnPaint(PaintEventArgs e)
@@ -218,9 +232,22 @@ namespace FlappyPaimon
 			if (RCThread.IsAlive) RCThread.Join();
 				RenderCompatible(e.Graphics);
 		}
+		int TmpFps=0;
+		int Fps=0;
+		long GameSeconds=0;
+		bool ShowFPS = false;
 		public void Render()
 		{
+			CanSetTouch = true;
+			long tempGameSeconds = UIWatch.ElapsedMilliseconds / 1000;
+			if (tempGameSeconds != GameSeconds)
+			{
+				GameSeconds = tempGameSeconds;
+				Fps = TmpFps;
+				TmpFps = 0;
+			}
 			#region Logics
+			if (playState == 0&&RotationAni!=null&&RotationAni.IsAnimating) RotationAni.Stop();
 			if (playState == 1)
 			{
 				if (LastTime != (UIWatch.ElapsedMilliseconds - BeginTime) / 1950)
@@ -255,7 +282,7 @@ namespace FlappyPaimon
 				{
 					foreach (var slime in Slimes)
 					{
-						if (slime.animationX.GetValue() <= 128 && slime.animationX.GetValue() >= -128 && PLocation > slime.y - 10 && PLocation < slime.y + 10)
+						if (slime.animationX.GetValue() <= 120 && slime.animationX.GetValue() >= -120 && PLocation > slime.y - 10 && PLocation < slime.y + 10)
 						{
 							GameOver(); AniDown();
 							break;
@@ -502,24 +529,54 @@ namespace FlappyPaimon
 			}
 			//Draw Buttons
 				if (!IsFSMouseOver)
-					RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6*GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.Linear);
+					RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6*GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
 				else
-					RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.Linear);
+					RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
 				if (MouseRelative.X >= UI_WIDTH - 54 - 54 && MouseRelative.X < UI_WIDTH - 6 - 54 && MouseRelative.Y >= 6 && MouseRelative.Y < 54)
 				{
 					if (isPlaySound)
-						RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.Linear);
+						RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
 					else
-						RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.Linear);
+						RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
 				}
 				else
 				{
 					if (isPlaySound)
-						RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.Linear);
+						RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
 					else
-						RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.Linear);
+						RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
+				}			if (ShowFPS)
+			{
+			RenderTarget.DrawBitmap(SDX, RelRectangleF(UI_WIDTH - SDX.PixelSize.Width-4, UI_HEIGHT - SDX.PixelSize.Height-4, SDX.PixelSize.Width, SDX.PixelSize.Height), 1, 
+			BitmapInterpolationMode.NearestNeighbor);
+			RenderTarget.DrawBitmap(FPS, RelRectangleF(4, UI_HEIGHT - FPS.PixelSize.Height-4, FPS.PixelSize.Width, FPS.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
+
+				int fDigits = 0;
+				if (Fps != 0)
+					fDigits = (int)Math.Log10(Fps);
+				for (int i = fDigits; i >= 0; i--)
+				{
+					SharpDX.Direct2D1.Bitmap fNumBitmap = Zero;
+					switch (Fps / (int)Math.Pow(10, i) % 10)
+					{
+						case 0: fNumBitmap = Zero; break;
+						case 1: fNumBitmap = One; break;
+						case 2: fNumBitmap = Two; break;
+						case 3: fNumBitmap = Three; break;
+						case 4: fNumBitmap = Four; break;
+						case 5: fNumBitmap = Five; break;
+						case 6: fNumBitmap = Six; break;
+						case 7: fNumBitmap = Seven; break;
+						case 8: fNumBitmap = Eight; break;
+						case 9: fNumBitmap = Nine; break;
+					}
+					int numWidth = fNumBitmap.PixelSize.Width, numHeight = fNumBitmap.PixelSize.Height;
+					int numBegin = digits * numWidth;
+					RenderTarget.DrawBitmap(fNumBitmap, RelRectangleF(4 + FPS.PixelSize.Width + 2 + (fDigits - i) * fNumBitmap.PixelSize.Width, UI_HEIGHT - fNumBitmap.PixelSize.Height - 6, numWidth, numHeight), 1, BitmapInterpolationMode.NearestNeighbor);
 				}
+			}
 			RenderTarget.EndDraw();
+			TmpFps++;
 			#endregion
 
 		}
@@ -577,7 +634,6 @@ namespace FlappyPaimon
 			while (forestComp < UI_WIDTH)
 			{
 				forestComp += FOREST_WIDTH;
-				//RenderTarget.DrawBitmap(ForestBitmap, RelRectangleF(-UIWatch.ElapsedMilliseconds / 10 % FOREST_WIDTH + forestComp, UI_HEIGHT - MAP_HEIGHT, FOREST_WIDTH, FOREST_WIDTH * ForestBitmap.Size.Height / ForestBitmap.Size.Width), 1, BitmapInterpolationMode.NearestNeighbor);
 				bGraphics.DrawImage(Properties.Resources.forest, -UIWatch.ElapsedMilliseconds / 10 % FOREST_WIDTH + forestComp, UI_HEIGHT - MAP_HEIGHT, FOREST_WIDTH, FOREST_WIDTH * ForestBitmap.Size.Height / ForestBitmap.Size.Width);
 			}
 			//Draw Obstacle
@@ -719,10 +775,39 @@ namespace FlappyPaimon
 					bGraphics.DrawImage(Properties.Resources.Sound, UI_WIDTH - 48 - 54 - 6, aniTime, 48, 48);
 				else
 					bGraphics.DrawImage(Properties.Resources.DisableSound, UI_WIDTH - 48 - 54 - 6, aniTime, 48, 48);
+			}			if (ShowFPS)
+			{
+			bGraphics.DrawImage(Properties.Resources.GDI, new Rectangle(UI_WIDTH - GDI.PixelSize.Width - 4, UI_HEIGHT - GDI.PixelSize.Height - 4, GDI.PixelSize.Width, GDI.PixelSize.Height));
+			bGraphics.DrawImage(Properties.Resources.FPS, new Rectangle(4, UI_HEIGHT - FPS.PixelSize.Height - 4, FPS.PixelSize.Width, FPS.PixelSize.Height));
+
+				int fDigits = 0;
+				if (Fps != 0)
+					fDigits = (int)Math.Log10(Fps);
+				for (int i = fDigits; i >= 0; i--)
+				{
+					System.Drawing.Bitmap fNumBitmap = GZero;
+					switch (Fps / (int)Math.Pow(10, i) % 10)
+					{
+						case 0: fNumBitmap = GZero; break;
+						case 1: fNumBitmap = GOne; break;
+						case 2: fNumBitmap = GTwo; break;
+						case 3: fNumBitmap = GThree; break;
+						case 4: fNumBitmap = GFour; break;
+						case 5: fNumBitmap = GFive; break;
+						case 6: fNumBitmap = GSix; break;
+						case 7: fNumBitmap = GSeven; break;
+						case 8: fNumBitmap = GEight; break;
+						case 9: fNumBitmap = GNine; break;
+					}
+					int numWidth = fNumBitmap.Width, numHeight = fNumBitmap.Height;
+					int numBegin = digits * numWidth;
+					bGraphics.DrawImage(fNumBitmap, new Rectangle(4 + FPS.PixelSize.Width + 2 + (fDigits - i) * fNumBitmap.Width, UI_HEIGHT - fNumBitmap.Height - 6, numWidth, numHeight));
+				}
 			}
 			g.DrawImage(renderBitmap, 0, 0, ClientSize.Width, ClientSize.Height);
 			bGraphics.Dispose();
 			renderBitmap.Dispose();
+			TmpFps++;
 		}
 		System.Drawing.Imaging.ImageAttributes SetOpacity(float opacity)
 		{
@@ -868,6 +953,7 @@ namespace FlappyPaimon
 		}
 		bool isFullScreen = false, allowState = true;
 		FormWindowState rState;
+		bool CanSetTouch = false;
 		protected override void WndProc(ref Message m)
 		{
 			var ustate = this.WindowState;
@@ -885,6 +971,7 @@ namespace FlappyPaimon
 				if (IsFSMouseOver)
 				{
 					FullScreen();
+					CanSetTouch = false;EnterPosition = 0;
 					return;
 				}
 				if (MouseRelative.X >= UI_WIDTH - 54 - 54 && MouseRelative.X < UI_WIDTH - 6 - 54 && MouseRelative.Y >= 6 && MouseRelative.Y < 54 && playState == 0)
@@ -904,10 +991,16 @@ namespace FlappyPaimon
 						PressPlayer.IsMuted = false;
 					}
 					isPlaySound = !isPlaySound;
+					CanSetTouch = false;EnterPosition = 0;
 					return;
 				}
 			}
 			Press(sender, e);
+			if (CanSetTouch)
+			{
+				TouchIndex = 0;
+				EnterPosition = MouseRelative.Y;
+			}
 		}
 		private void FullScreen()
 		{
@@ -982,7 +1075,7 @@ namespace FlappyPaimon
 					PLocation = GameAni.GetValue();
 				};
 				GameAni.Restart();
-				RotationAni = new THAnimations.EasyAni() { From = -2, To = 118, Duration = 2, EasingFunction = THAnimations.EasingFunction.PowerIn, Pow = 2 };
+				RotationAni = new THAnimations.EasyAni() { From = -3, To = 117, Duration = 2, EasingFunction = THAnimations.EasingFunction.PowerIn, Pow = 2 };
 				RotationAni.Animating = (object o, EventArgs a) => { PRotation = RotationAni.GetValue(); };
 				RotationAni.Restart();
 				PlayPress();
@@ -1013,6 +1106,8 @@ namespace FlappyPaimon
 				Score = 0;
 				EndWatch.Stop(); EndWatch.Restart();
 				PlayBGM();
+				TmpFps = 0;
+				Fps = 0;
 				GC.Collect();
 			}
 		}
@@ -1046,6 +1141,7 @@ namespace FlappyPaimon
 		{
 			if(e.KeyCode==Keys.F11){ FullScreen();return; }
 			if(e.KeyCode==Keys.F12) { System.Diagnostics.Process.Start("https://g.evkgame.cn/214101"); return; }
+			if(e.KeyCode==Keys.F3){ ShowFPS = !ShowFPS;return; }
 			if (e.Alt || e.Control || e.Shift || e.KeyCode == Keys.LWin || e.KeyCode == Keys.RWin) return;
 			Press(sender, e);
 		}

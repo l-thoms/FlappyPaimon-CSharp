@@ -266,6 +266,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
+    <None Include="Resources\GDI.png" />
+    <None Include="Resources\FPS.png" />
+    <None Include="Resources\SDX.png" />
     <None Include="Resources\DisableSound.png" />
     <None Include="Resources\Sound.png" />
     <None Include="Resources\Fullscreen.png" />
