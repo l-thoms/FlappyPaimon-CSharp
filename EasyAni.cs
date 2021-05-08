@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+/*
+	The core engine, which can be used to control the movements and animations.
+ */
 namespace THAnimations
 {
 	public enum EasingFunction
