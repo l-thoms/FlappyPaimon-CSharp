@@ -15,3 +15,4 @@ L:\Develop\CS\FlappyPaimon\bin\Release\SharpDX.DXGI.xml
 L:\Develop\CS\FlappyPaimon\bin\Release\System.Diagnostics.DiagnosticSource.xml
 L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.csproj.Fody.CopyLocal.cache
 L:\Develop\CS\FlappyPaimon\bin\Release\SharpGL.xml
+L:\Develop\CS\FlappyPaimon\obj\Release\FlappyPaimon.LoadControl.resources

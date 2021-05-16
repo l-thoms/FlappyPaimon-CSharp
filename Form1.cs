@@ -20,14 +20,17 @@ namespace FlappyPaimon
 		public static extern IntPtr GetDC(IntPtr hwnd);
 		long GameTime;
 		bool isLoaded = false;
+		LoadControl loadControl = new LoadControl();
 		public Form1()
 		{
-			GameUI = this;
 			CheckForIllegalCrossThreadCalls = false;
 			InitializeComponent();
+		}
+		void InitGame()
+		{
+			GameUI = this;
 			this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 			float DPI = this.CreateGraphics().DpiX / 96f;
-			ClientSize = new Size(Convert.ToInt32(1066 * DPI), Convert.ToInt32(600 * DPI));
 			pTimer.Elapsed += PTimer_Tick;
 			RestAni.Animated = (object o, EventArgs a) =>
 			{
@@ -40,13 +43,14 @@ namespace FlappyPaimon
 				if (RestAni.IsAnimating == false) ReRest();
 			};
 			InitDevices();
+			LoadImage();
+			UIWatch.Start();
 			LoadSounds();
 			Timer t0 = new Timer() { Interval = 1 };
 			t0.Tick += (object o, EventArgs a) => Render();
 			t0.Start();
 			RCThread = new System.Threading.Thread(new System.Threading.ThreadStart(CompatibleLoop));
 		}
-
 		void ReRest()
 		{
 			if (RestAni.Description == "up")
@@ -228,9 +232,12 @@ namespace FlappyPaimon
 		bool UseCompatibleMode = false;
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			if(RCThread.IsAlive)RCThread.Abort();
-			if (RCThread.IsAlive) RCThread.Join();
+			if (isLoaded)
+			{
+				if (RCThread.IsAlive) RCThread.Abort();
+				if (RCThread.IsAlive) RCThread.Join();
 				RenderCompatible(e.Graphics);
+			}
 		}
 		int TmpFps=0;
 		int Fps=0;
@@ -239,7 +246,7 @@ namespace FlappyPaimon
 		public void Render()
 		{
 			CanSetTouch = true;
-			long tempGameSeconds = UIWatch.ElapsedMilliseconds / 1000;
+			long tempGameSeconds = (UIWatch.ElapsedMilliseconds+EndWatch.ElapsedMilliseconds) / 1000;
 			if (tempGameSeconds != GameSeconds)
 			{
 				GameSeconds = tempGameSeconds;
@@ -951,7 +958,7 @@ namespace FlappyPaimon
 		{
 			return new RawMatrix3x2(src.M11, src.M12, src.M21, src.M22, src.M31, src.M32);
 		}
-		bool isFullScreen = false, allowState = true;
+		public bool isFullScreen = false, allowState = true;
 		FormWindowState rState;
 		bool CanSetTouch = false;
 		protected override void WndProc(ref Message m)
@@ -1002,7 +1009,7 @@ namespace FlappyPaimon
 				EnterPosition = MouseRelative.Y;
 			}
 		}
-		private void FullScreen()
+		public void FullScreen()
 		{
 			if (!isFullScreen)
 			{
@@ -1104,7 +1111,7 @@ namespace FlappyPaimon
 				PRotation = 0;
 				playState = 0;
 				Score = 0;
-				EndWatch.Stop(); EndWatch.Restart();
+				EndWatch.Restart();EndWatch.Stop(); 
 				PlayBGM();
 				TmpFps = 0;
 				Fps = 0;
@@ -1202,7 +1209,7 @@ namespace FlappyPaimon
 		}
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			if (RCThread.IsAlive) RCThread.Abort();
+			if (RCThread!=null&&RCThread.IsAlive) RCThread.Abort();
 			//GameUI.CreateGraphics().DrawString("Application is closing. Please wait...", new Font("", 12), new SolidBrush(Color.Black), new Point());
 			this.Hide();
 			BGMPlayer.Stop();
@@ -1221,11 +1228,16 @@ namespace FlappyPaimon
 		IntPtr WindowDC;
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			LoadImage();
+			float DPI = this.CreateGraphics().DpiX / 96;
+			ClientSize = new Size(Convert.ToInt32(1066 * DPI), Convert.ToInt32(600 * DPI));
+			this.Controls.Add(loadControl);
+			loadControl.Dock = DockStyle.Fill;
+			loadControl.Failed = (object o, EventArgs a) => { };
+			loadControl.Completed = (object o, EventArgs a) => { loadControl.LoadResources(); InitGame(); this.Controls.Remove(loadControl); loadControl.Dispose(); };
 			this.Left = (SystemInformation.WorkingArea.Width - this.Width) / 2;
 			this.Top = (SystemInformation.WorkingArea.Height - this.Height) / 2;
 			if (this.Width > SystemInformation.WorkingArea.Width || this.Height > SystemInformation.WorkingArea.Height) FullScreen();
-			UIWatch.Start();
+			loadControl.CheckResources();
 		}
 		void GLInit()
 		{

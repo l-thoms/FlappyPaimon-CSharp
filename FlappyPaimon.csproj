@@ -163,10 +163,19 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="LoadControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LoadControl.Designer.cs">
+      <DependentUpon>LoadControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoadControl.resx">
+      <DependentUpon>LoadControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -190,93 +199,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Resources\pfly" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\bainianji.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\bgm.mp3" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\cloud.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\distance.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\forest.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ground.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\hit.mp3" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\number.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\pass.mp3" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\press.mp3" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\pstate.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\slime.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\slime0.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\slime2.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\smoke.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\stone.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\title.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\tube_lower.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\tube_upper.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\yuanshi.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\yuanshi_smaller.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\pfly.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\pDead.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\pNormal.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
-    <None Include="Resources\GDI.png" />
-    <None Include="Resources\FPS.png" />
-    <None Include="Resources\SDX.png" />
-    <None Include="Resources\DisableSound.png" />
-    <None Include="Resources\Sound.png" />
-    <None Include="Resources\Fullscreen.png" />
-    <None Include="Resources\particle4.png" />
-    <None Include="Resources\particle3.png" />
-    <None Include="Resources\particle2.png" />
-    <None Include="Resources\particle1.png" />
-    <None Include="Resources\slime1.png" />
+    <None Include="Resources\Failed.png" />
+    <None Include="Resources\ResourceList.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Fody.6.3.0\build\Fody.targets" Condition="Exists('packages\Fody.6.3.0\build\Fody.targets')" />
