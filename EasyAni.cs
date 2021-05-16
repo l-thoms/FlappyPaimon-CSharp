@@ -56,7 +56,6 @@ namespace THAnimations
 				aniWatch.Start();
 			}
 		}
-
 		private void AniTimer_Tick(object sender, EventArgs e)
 		{
 			long tick = aniWatch.ElapsedMilliseconds;
@@ -73,7 +72,12 @@ namespace THAnimations
 		public double GetValue()
 		{
 			double current = 0;
-			switch(EasingFunction)
+			double Progress;
+			if (IsAnimating)
+				Progress = Convert.ToDouble(aniWatch.ElapsedMilliseconds) / 1000 / Duration;
+			else
+				Progress = this.Progress;
+			switch (EasingFunction)
 			{
 				default:
 					current = Progress;	

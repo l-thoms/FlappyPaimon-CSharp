@@ -46,11 +46,11 @@ namespace FlappyPaimon
 			LoadImage();
 			UIWatch.Start();
 			LoadSounds();
-			Timer t0 = new Timer() { Interval = 1 };
 			t0.Tick += (object o, EventArgs a) => Render();
-			t0.Start();
 			RCThread = new System.Threading.Thread(new System.Threading.ThreadStart(CompatibleLoop));
+			UseCompatibleMode = false;
 		}
+		Timer t0 = new Timer() { Interval = 1 };
 		void ReRest()
 		{
 			if (RestAni.Description == "up")
@@ -66,7 +66,7 @@ namespace FlappyPaimon
 			GC.Collect();
 		}
 		SharpDX.Direct2D1.Bitmap CloudBitmap, StoneBitmap, GroundBitmap, ForestBitmap, PNormal, PFly, TitleBitmap, PDead, TubeUpper, TubeLower, Slime0, Slime1, Slime2, YSBitmap,
-		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero, FSBitmap, Sound, DisableSound,SDX,FPS,GDI;
+		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero, FSBitmap, Sound, DisableSound, SDX, FPS, GDI;
 		System.Drawing.Bitmap GZero, GOne, GTwo, GThree, GFour, GFive, GSix, GSeven, GEight, GNine;
 		void LoadImage()
 		{
@@ -209,7 +209,7 @@ namespace FlappyPaimon
 		double PLocation = 50, PRotation = 0;
 
 		Point MouseAbsolute = new Point();
-		int EnterPosition=0;
+		int EnterPosition = 0;
 		int TouchIndex = 0;
 		private void GameUI_MouseMove(object sender, MouseEventArgs e)
 		{
@@ -219,10 +219,10 @@ namespace FlappyPaimon
 			if (MouseRelative.X >= UI_WIDTH - 54 && MouseRelative.X < UI_WIDTH - 6 && MouseRelative.Y >= 6 && MouseRelative.Y < 54)
 				IsFSMouseOver = true;
 			else IsFSMouseOver = false;
-			if(e.Button==MouseButtons.Left&&CanSetTouch&&playState!=2)
+			if (e.Button == MouseButtons.Left && CanSetTouch && playState != 2)
 			{
-				int tempIndex = (EnterPosition-MouseRelative.Y ) / 30;
-				if(tempIndex>TouchIndex)
+				int tempIndex = (EnterPosition - MouseRelative.Y) / 30;
+				if (tempIndex > TouchIndex)
 				{
 					Press(sender, e);
 					TouchIndex = tempIndex;
@@ -239,14 +239,14 @@ namespace FlappyPaimon
 				RenderCompatible(e.Graphics);
 			}
 		}
-		int TmpFps=0;
-		int Fps=0;
-		long GameSeconds=0;
+		int TmpFps = 0;
+		int Fps = 0;
+		long GameSeconds = 0;
 		bool ShowFPS = false;
 		public void Render()
 		{
 			CanSetTouch = true;
-			long tempGameSeconds = (UIWatch.ElapsedMilliseconds+EndWatch.ElapsedMilliseconds) / 1000;
+			long tempGameSeconds = (UIWatch.ElapsedMilliseconds + EndWatch.ElapsedMilliseconds) / 1000;
 			if (tempGameSeconds != GameSeconds)
 			{
 				GameSeconds = tempGameSeconds;
@@ -254,7 +254,7 @@ namespace FlappyPaimon
 				TmpFps = 0;
 			}
 			#region Logics
-			if (playState == 0&&RotationAni!=null&&RotationAni.IsAnimating) RotationAni.Stop();
+			if (playState == 0 && RotationAni != null && RotationAni.IsAnimating) RotationAni.Stop();
 			if (playState == 1)
 			{
 				if (LastTime != (UIWatch.ElapsedMilliseconds - BeginTime) / 1950)
@@ -357,46 +357,46 @@ namespace FlappyPaimon
 		}
 		public void RenderSDX()
 		{
-		/*
-			if (!isinited) GLInit();
-			SharpGL.Win32.wglMakeCurrent(WindowDC, GLContext);
-			Gl.Enable(SharpGL.OpenGL.GL_SMOOTH);
-			Gl.ClearColor(97 / 255f, 224 / 255f, 1, .5f);
-			Gl.Clear(SharpGL.OpenGL.GL_COLOR_BUFFER_BIT|SharpGL.OpenGL.GL_DEPTH_BUFFER_BIT);
-			Gl.Ortho2D(0, 0, ClientSize.Width, ClientSize.Height);
-			Gl.MatrixMode(SharpGL.Enumerations.MatrixMode.Projection);
-			Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
-			Gl.LoadIdentity();
+			/*
+				if (!isinited) GLInit();
+				SharpGL.Win32.wglMakeCurrent(WindowDC, GLContext);
+				Gl.Enable(SharpGL.OpenGL.GL_SMOOTH);
+				Gl.ClearColor(97 / 255f, 224 / 255f, 1, .5f);
+				Gl.Clear(SharpGL.OpenGL.GL_COLOR_BUFFER_BIT|SharpGL.OpenGL.GL_DEPTH_BUFFER_BIT);
+				Gl.Ortho2D(0, 0, ClientSize.Width, ClientSize.Height);
+				Gl.MatrixMode(SharpGL.Enumerations.MatrixMode.Projection);
+				Gl.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
+				Gl.LoadIdentity();
 
-			float h = (float)(2 * Math.Tan(22.5) * 0.1);
-			//Gl.Perspective(45, ClientSize.Height / h, 0.1, 1000);
-			//Gl.Scale(1f/ClientSize.Width, -1f/ClientSize.Height,1);
-			//Gl.Translate(-.5, -.5,0);
+				float h = (float)(2 * Math.Tan(22.5) * 0.1);
+				//Gl.Perspective(45, ClientSize.Height / h, 0.1, 1000);
+				//Gl.Scale(1f/ClientSize.Width, -1f/ClientSize.Height,1);
+				//Gl.Translate(-.5, -.5,0);
 
-			float density = (float)ClientSize.Height / UI_HEIGHT;
-			float din = (float)Math.Ceiling(density * 2) / 2;
-			UI_WIDTH = (int)(ClientSize.Width / density);
+				float density = (float)ClientSize.Height / UI_HEIGHT;
+				float din = (float)Math.Ceiling(density * 2) / 2;
+				UI_WIDTH = (int)(ClientSize.Width / density);
 
-			//Draw Background
-			int cloudComp = -BG_WIDTH;
-			while (cloudComp < UI_WIDTH)
-			{
-				cloudComp += BG_WIDTH;
-				//bGraphics.DrawImage(Properties.Resources.cloud, -UIWatch.ElapsedMilliseconds / 20 % BG_WIDTH + cloudComp, UI_HEIGHT - MAP_HEIGHT, BG_WIDTH, BG_WIDTH * CloudBitmap.Size.Height / CloudBitmap.Size.Width);
+				//Draw Background
+				int cloudComp = -BG_WIDTH;
+				while (cloudComp < UI_WIDTH)
+				{
+					cloudComp += BG_WIDTH;
+					//bGraphics.DrawImage(Properties.Resources.cloud, -UIWatch.ElapsedMilliseconds / 20 % BG_WIDTH + cloudComp, UI_HEIGHT - MAP_HEIGHT, BG_WIDTH, BG_WIDTH * CloudBitmap.Size.Height / CloudBitmap.Size.Width);
 
-				GLLoadBitmap(Properties.Resources.tube_lower);
-				Gl.Begin(SharpGL.Enumerations.BeginMode.Quads);
-				Gl.Color(255, 0, 255,255);
-				Gl.Vertex(-1, -1);
-				Gl.Vertex(1, -1);
-				Gl.Vertex(1, 1);
-				Gl.Vertex(-1, 1);
-				Gl.End();
-			}
+					GLLoadBitmap(Properties.Resources.tube_lower);
+					Gl.Begin(SharpGL.Enumerations.BeginMode.Quads);
+					Gl.Color(255, 0, 255,255);
+					Gl.Vertex(-1, -1);
+					Gl.Vertex(1, -1);
+					Gl.Vertex(1, 1);
+					Gl.Vertex(-1, 1);
+					Gl.End();
+				}
 
-			SharpGL.Win32.SwapBuffers(WindowDC);
-			Gl.Flush();
-			return;*/
+				SharpGL.Win32.SwapBuffers(WindowDC);
+				Gl.Flush();
+				return;*/
 			#region Direct2D
 			GameUI.BackgroundImage = null;
 			float density = (float)ClientSize.Height / UI_HEIGHT;
@@ -452,7 +452,7 @@ namespace FlappyPaimon
 					case 3: SCurrent = Slime2; break;
 				}
 				RenderTarget.DrawBitmap(SCurrent, RelRectangleF((float)(slime.animationX.GetValue() - SCurrent.PixelSize.Width) / 2 + UI_WIDTH / 2,
-				(float)((float)UI_HEIGHT * (GROUND_LOCATION + SCurrent.PixelSize.Height / 4) / MAP_HEIGHT * slime.y / 100),
+				(float)((float)UI_HEIGHT * (GROUND_LOCATION + SCurrent.PixelSize.Height / 4) / MAP_HEIGHT * slime.animationY.GetValue() / 100),
 				SCurrent.PixelSize.Width, SCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 			}
 			//Draw Stone
@@ -478,16 +478,23 @@ namespace FlappyPaimon
 			else
 			{
 				RawMatrix3x2 oldMatrix = RenderTarget.Transform;
-				RenderTarget.Transform = ConvertMatrix(Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
-				UI_WIDTH / 2, (float)(UI_HEIGHT * (PLocation / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0)));
+				RenderTarget.Transform = ConvertMatrix(Matrix3x2.CreateRotation((float)(RotationAni.GetValue() / 180 * Math.PI), new Vector2(
+				UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0)));
 				if (playState == 1)
 					RenderTarget.DrawBitmap(PCurrent, RelRectangleF((UI_WIDTH - PCurrent.PixelSize.Width) / 2,
-					(float)(UI_HEIGHT * (PLocation / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) - PCurrent.PixelSize.Height / 2 + TOP_0, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
+					(float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) - PCurrent.PixelSize.Height / 2 + TOP_0, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 				else
 				{
 					PCurrent = PDead;
-					RenderTarget.Transform = ConvertMatrix(Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
-					UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0)));
+					Matrix3x2 currentMatrix;
+					if (RotationAni.IsAnimating)
+						currentMatrix = Matrix3x2.CreateRotation((float)(RotationAni.GetValue() / 180 * Math.PI), new Vector2(
+					UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
+					else
+						currentMatrix = Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
+					UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
+					RenderTarget.Transform = ConvertMatrix(currentMatrix);
+					RenderTarget.Transform = new RawMatrix3x2(RenderTarget.Transform.M11, RenderTarget.Transform.M12 , RenderTarget.Transform.M21, RenderTarget.Transform.M22, RenderTarget.Transform.M31, RenderTarget.Transform.M32);
 					RenderTarget.DrawBitmap(PCurrent, RelRectangleF((UI_WIDTH - PCurrent.PixelSize.Width) / 2,
 				  (float)((UI_HEIGHT) * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) - PCurrent.PixelSize.Height / 2 + TOP_0, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 				}
@@ -535,28 +542,29 @@ namespace FlappyPaimon
 				}
 			}
 			//Draw Buttons
-				if (!IsFSMouseOver)
-					RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6*GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
-				else
-					RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
-				if (MouseRelative.X >= UI_WIDTH - 54 - 54 && MouseRelative.X < UI_WIDTH - 6 - 54 && MouseRelative.Y >= 6 && MouseRelative.Y < 54)
-				{
-					if (isPlaySound)
-						RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
-					else
-						RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
-				}
-				else
-				{
-					if (isPlaySound)
-						RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
-					else
-						RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
-				}			if (ShowFPS)
+			if (!IsFSMouseOver)
+				RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
+			else
+				RenderTarget.DrawBitmap(FSBitmap, RelRectangleF(UI_WIDTH - 48 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
+			if (MouseRelative.X >= UI_WIDTH - 54 - 54 && MouseRelative.X < UI_WIDTH - 6 - 54 && MouseRelative.Y >= 6 && MouseRelative.Y < 54)
 			{
-			RenderTarget.DrawBitmap(SDX, RelRectangleF(UI_WIDTH - SDX.PixelSize.Width-4, UI_HEIGHT - SDX.PixelSize.Height-4, SDX.PixelSize.Width, SDX.PixelSize.Height), 1, 
-			BitmapInterpolationMode.NearestNeighbor);
-			RenderTarget.DrawBitmap(FPS, RelRectangleF(4, UI_HEIGHT - FPS.PixelSize.Height-4, FPS.PixelSize.Width, FPS.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
+				if (isPlaySound)
+					RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
+				else
+					RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 0.5f, BitmapInterpolationMode.NearestNeighbor);
+			}
+			else
+			{
+				if (isPlaySound)
+					RenderTarget.DrawBitmap(Sound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
+				else
+					RenderTarget.DrawBitmap(DisableSound, RelRectangleF(UI_WIDTH - 48 - 54 - 6, 6 * GetEnterAni(), 48, 48), 1, BitmapInterpolationMode.NearestNeighbor);
+			}
+			if (ShowFPS)
+			{
+				RenderTarget.DrawBitmap(SDX, RelRectangleF(UI_WIDTH - SDX.PixelSize.Width - 4, UI_HEIGHT - SDX.PixelSize.Height - 4, SDX.PixelSize.Width, SDX.PixelSize.Height), 1,
+				BitmapInterpolationMode.NearestNeighbor);
+				RenderTarget.DrawBitmap(FPS, RelRectangleF(4, UI_HEIGHT - FPS.PixelSize.Height - 4, FPS.PixelSize.Width, FPS.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 
 				int fDigits = 0;
 				if (Fps != 0)
@@ -590,24 +598,37 @@ namespace FlappyPaimon
 		float GetEnterAni()
 		{
 			float enterAni = 0;
-			enterAni = UIWatch.ElapsedMilliseconds/10f -10;
+			enterAni = UIWatch.ElapsedMilliseconds / 10f - 10;
 			if (enterAni > 1) enterAni = 1;
-			if(playState!=0)
+			if (playState != 0)
 			{
-				enterAni = -(UIWatch.ElapsedMilliseconds - BeginTime)/10f;
+				enterAni = -(UIWatch.ElapsedMilliseconds - BeginTime) / 10f;
 				if (enterAni < -100) enterAni = 100;
 			}
 			return enterAni;
 		}
+
+		private void Form1_ResizeBegin(object sender, EventArgs e)
+		{
+			if(isLoaded)
+			t0.Start();
+		}
+
+		private void Form1_ResizeEnd(object sender, EventArgs e)
+		{
+			if (isLoaded)
+				t0.Stop();
+		}
+
 		void GLLoadBitmap(System.Drawing.Bitmap source)
 		{
-			Gl.Bitmap(source.Width,source.Height, 0, 0, 0, 0, GetBitmapData(source));
+			Gl.Bitmap(source.Width, source.Height, 0, 0, 0, 0, GetBitmapData(source));
 		}
 		byte[] GetBitmapData(System.Drawing.Bitmap source)
 		{
-			System.Drawing.Bitmap compressedBitmap = new System.Drawing.Bitmap(source.Width,source.Height);
+			System.Drawing.Bitmap compressedBitmap = new System.Drawing.Bitmap(source.Width, source.Height);
 			Graphics.FromImage(compressedBitmap).DrawImage(source, 0, 0);
-			var bits = source.LockBits(new Rectangle(0,0,source.Width,source.Height),System.Drawing.Imaging.ImageLockMode.ReadOnly,System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+			var bits = source.LockBits(new Rectangle(0, 0, source.Width, source.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 			byte[] data = new byte[source.Width * source.Height * 4];
 			Marshal.Copy(bits.Scan0, data, 0, data.Length);
 			//compressedBitmap.UnlockBits(bits);
@@ -678,7 +699,7 @@ namespace FlappyPaimon
 					case 3: SCurrent = Properties.Resources.slime2; break;
 				}
 				bGraphics.DrawImage(SCurrent, (float)(slime.animationX.GetValue() - SCurrent.Size.Width) / 2 + UI_WIDTH / 2,
-				(float)((float)UI_HEIGHT * (GROUND_LOCATION + SCurrent.Size.Height / 4) / MAP_HEIGHT * slime.y / 100),
+				(float)((float)UI_HEIGHT * (GROUND_LOCATION + SCurrent.Size.Height / 4) / MAP_HEIGHT * slime.animationY.GetValue() / 100),
 				SCurrent.Size.Width, SCurrent.Size.Height);
 			}
 			//Draw Stone
@@ -702,7 +723,7 @@ namespace FlappyPaimon
 			}
 			else
 			{
-				var rMatrix = Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
+				var rMatrix = Matrix3x2.CreateRotation((float)(RotationAni.GetValue() / 180 * Math.PI), new Vector2(
 				UI_WIDTH / 2, (float)(UI_HEIGHT * (PLocation / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
 				bGraphics.Transform = new System.Drawing.Drawing2D.Matrix(rMatrix.M11 * din, rMatrix.M12 * din, rMatrix.M21 * din, rMatrix.M22 * din, rMatrix.M31 * din, rMatrix.M32 * din);
 
@@ -712,8 +733,12 @@ namespace FlappyPaimon
 				else
 				{
 					PCurrent = Properties.Resources.pDead;
-					rMatrix = Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
+					if(RotationAni.IsAnimating)
+					rMatrix = Matrix3x2.CreateRotation((float)(RotationAni.GetValue() / 180 * Math.PI), new Vector2(
 						UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
+					else
+						rMatrix = Matrix3x2.CreateRotation((float)(PRotation/ 180 * Math.PI), new Vector2(
+							UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
 					bGraphics.Transform = new System.Drawing.Drawing2D.Matrix(rMatrix.M11 * din, rMatrix.M12 * din, rMatrix.M21 * din, rMatrix.M22 * din, rMatrix.M31 * din, rMatrix.M32 * din);
 					bGraphics.DrawImage(PCurrent, (UI_WIDTH - PCurrent.Size.Width) / 2,
 				  (float)((UI_HEIGHT) * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) - PCurrent.Size.Height / 2 + TOP_0, PCurrent.Size.Width, PCurrent.Size.Height);
@@ -782,10 +807,11 @@ namespace FlappyPaimon
 					bGraphics.DrawImage(Properties.Resources.Sound, UI_WIDTH - 48 - 54 - 6, aniTime, 48, 48);
 				else
 					bGraphics.DrawImage(Properties.Resources.DisableSound, UI_WIDTH - 48 - 54 - 6, aniTime, 48, 48);
-			}			if (ShowFPS)
+			}
+			if (ShowFPS)
 			{
-			bGraphics.DrawImage(Properties.Resources.GDI, new Rectangle(UI_WIDTH - GDI.PixelSize.Width - 4, UI_HEIGHT - GDI.PixelSize.Height - 4, GDI.PixelSize.Width, GDI.PixelSize.Height));
-			bGraphics.DrawImage(Properties.Resources.FPS, new Rectangle(4, UI_HEIGHT - FPS.PixelSize.Height - 4, FPS.PixelSize.Width, FPS.PixelSize.Height));
+				bGraphics.DrawImage(Properties.Resources.GDI, new Rectangle(UI_WIDTH - GDI.PixelSize.Width - 4, UI_HEIGHT - GDI.PixelSize.Height - 4, GDI.PixelSize.Width, GDI.PixelSize.Height));
+				bGraphics.DrawImage(Properties.Resources.FPS, new Rectangle(4, UI_HEIGHT - FPS.PixelSize.Height - 4, FPS.PixelSize.Width, FPS.PixelSize.Height));
 
 				int fDigits = 0;
 				if (Fps != 0)
@@ -978,7 +1004,7 @@ namespace FlappyPaimon
 				if (IsFSMouseOver)
 				{
 					FullScreen();
-					CanSetTouch = false;EnterPosition = 0;
+					CanSetTouch = false; EnterPosition = 0;
 					return;
 				}
 				if (MouseRelative.X >= UI_WIDTH - 54 - 54 && MouseRelative.X < UI_WIDTH - 6 - 54 && MouseRelative.Y >= 6 && MouseRelative.Y < 54 && playState == 0)
@@ -998,7 +1024,7 @@ namespace FlappyPaimon
 						PressPlayer.IsMuted = false;
 					}
 					isPlaySound = !isPlaySound;
-					CanSetTouch = false;EnterPosition = 0;
+					CanSetTouch = false; EnterPosition = 0;
 					return;
 				}
 			}
@@ -1083,7 +1109,7 @@ namespace FlappyPaimon
 				};
 				GameAni.Restart();
 				RotationAni = new THAnimations.EasyAni() { From = -3, To = 117, Duration = 2, EasingFunction = THAnimations.EasingFunction.PowerIn, Pow = 2 };
-				RotationAni.Animating = (object o, EventArgs a) => { PRotation = RotationAni.GetValue(); };
+				RotationAni.Animating = (object o, EventArgs a) => { if (RotationAni.IsAnimating) { PRotation = RotationAni.GetValue(); } };
 				RotationAni.Restart();
 				PlayPress();
 				GC.Collect();
@@ -1111,7 +1137,7 @@ namespace FlappyPaimon
 				PRotation = 0;
 				playState = 0;
 				Score = 0;
-				EndWatch.Restart();EndWatch.Stop(); 
+				EndWatch.Restart(); EndWatch.Stop();
 				PlayBGM();
 				TmpFps = 0;
 				Fps = 0;
@@ -1122,11 +1148,13 @@ namespace FlappyPaimon
 		{
 
 		}
+		double LastLocation;
 		private void AniDown()
 		{
 			GameAni = new THAnimations.EasyAni();
 			GameAni.From = PLocation;
-			GameAni.To = PLocation + 100;
+			LastLocation = PLocation;
+			GameAni.To = LastLocation + 100;
 			GameAni.Description = "down";
 			GameAni.EasingFunction = THAnimations.EasingFunction.PowerIn;
 			GameAni.Pow = 2;
@@ -1137,7 +1165,7 @@ namespace FlappyPaimon
 					PLocation = GameAni.GetValue();
 				if (GameAni.GetValue() >= 100)
 				{
-					GameAni.To = 100; GameAni.Stop();
+					GameAni.To = 100+PRotation/30; GameAni.Stop();
 					RotationAni.To = RotationAni.GetValue(); RotationAni.Stop();
 				}
 			};
@@ -1146,16 +1174,16 @@ namespace FlappyPaimon
 		}
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
-			if(e.KeyCode==Keys.F11){ FullScreen();return; }
-			if(e.KeyCode==Keys.F12) { System.Diagnostics.Process.Start("https://g.evkgame.cn/214101"); return; }
-			if(e.KeyCode==Keys.F3){ ShowFPS = !ShowFPS;return; }
+			if (e.KeyCode == Keys.F11) { FullScreen(); return; }
+			if (e.KeyCode == Keys.F12) { System.Diagnostics.Process.Start("https://g.evkgame.cn/214101"); return; }
+			if (e.KeyCode == Keys.F3) { ShowFPS = !ShowFPS; return; }
 			if (e.Alt || e.Control || e.Shift || e.KeyCode == Keys.LWin || e.KeyCode == Keys.RWin) return;
 			Press(sender, e);
 		}
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			base.OnMouseWheel(e);
-			if (e.Delta > 0&&playState!=2) Press(null, new EventArgs());
+			if (e.Delta > 0 && playState != 2) Press(null, new EventArgs());
 		}
 		WindowRenderTarget RenderTarget;
 		RawColor4 ConvertColor(Color source)
@@ -1187,7 +1215,7 @@ namespace FlappyPaimon
 		SharpDX.Direct2D1.Bitmap ConvertBitmap(System.Drawing.Bitmap source)
 		{
 			System.Drawing.Bitmap formattedBitmap = new System.Drawing.Bitmap(source.Width, source.Height);
-			Graphics.FromImage(formattedBitmap).DrawImage(source, new RectangleF(0, 0,source.Width,source.Height));
+			Graphics.FromImage(formattedBitmap).DrawImage(source, new RectangleF(0, 0, source.Width, source.Height));
 			System.Drawing.Imaging.BitmapData bitmapData = formattedBitmap.LockBits(new Rectangle(0, 0, source.Width, source.Height),
 			System.Drawing.Imaging.ImageLockMode.ReadOnly,
 			formattedBitmap.PixelFormat);
@@ -1209,7 +1237,7 @@ namespace FlappyPaimon
 		}
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			if (RCThread!=null&&RCThread.IsAlive) RCThread.Abort();
+			if (RCThread != null && RCThread.IsAlive) RCThread.Abort();
 			//GameUI.CreateGraphics().DrawString("Application is closing. Please wait...", new Font("", 12), new SolidBrush(Color.Black), new Point());
 			this.Hide();
 			BGMPlayer.Stop();
@@ -1245,14 +1273,14 @@ namespace FlappyPaimon
 			SharpGL.Win32.PIXELFORMATDESCRIPTOR pfd = new SharpGL.Win32.PIXELFORMATDESCRIPTOR();
 			pfd.Init();
 			pfd.nVersion = 1;
-			pfd.dwFlags = SharpGL.Win32.PFD_DRAW_TO_WINDOW| SharpGL.Win32.PFD_SUPPORT_OPENGL| SharpGL.Win32.PFD_DOUBLEBUFFER;
+			pfd.dwFlags = SharpGL.Win32.PFD_DRAW_TO_WINDOW | SharpGL.Win32.PFD_SUPPORT_OPENGL | SharpGL.Win32.PFD_DOUBLEBUFFER;
 			pfd.iPixelType = SharpGL.Win32.PFD_TYPE_RGBA;
 			pfd.cColorBits = (byte)32;
 			pfd.cDepthBits = 16;
 			pfd.cStencilBits = 8;
 			pfd.iLayerType = SharpGL.Win32.PFD_MAIN_PLANE;
-			int iPixelFormat = SharpGL.Win32.ChoosePixelFormat(WindowDC,pfd);
-			SharpGL.Win32.SetPixelFormat(WindowDC, iPixelFormat,pfd);
+			int iPixelFormat = SharpGL.Win32.ChoosePixelFormat(WindowDC, pfd);
+			SharpGL.Win32.SetPixelFormat(WindowDC, iPixelFormat, pfd);
 
 			//GLDevice = OpenGL.DeviceContext.Create(IntPtr.Zero, this.Handle);
 			GLContext = SharpGL.Win32.wglCreateContext(WindowDC);
@@ -1260,7 +1288,7 @@ namespace FlappyPaimon
 			isinited = true;
 		}
 	}
-	public class BufferedPanel:Panel
+	public class BufferedPanel : Panel
 	{
 		public BufferedPanel()
 		{
@@ -1279,7 +1307,7 @@ namespace FlappyPaimon
 	}
 	public class Tube
 	{
-		public Tube(){ }
+		public Tube() { }
 		public double x { get; set; }
 		public double y { get; set; }
 		public bool isPass { get; set; }

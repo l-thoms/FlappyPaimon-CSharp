@@ -46,6 +46,8 @@
 			this.Text = "Flappy Paimon";
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
 			this.Load += new System.EventHandler(this.Form1_Load);
+			this.ResizeBegin += new System.EventHandler(this.Form1_ResizeBegin);
+			this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseMove);
