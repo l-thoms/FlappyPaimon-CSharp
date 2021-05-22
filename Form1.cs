@@ -1,4 +1,4 @@
-﻿using SharpDX;
+using SharpDX;
 using SharpDX.Direct2D1;
 using SharpDX.Mathematics.Interop;
 using System;
@@ -13,6 +13,7 @@ namespace FlappyPaimon
 {
 	public partial class Form1 : Form
 	{
+		string ResourcePath;
 		Stopwatch UIWatch = new Stopwatch(), EndWatch = new Stopwatch();
 		Control GameUI;
 		IntPtr GLContext;
@@ -25,6 +26,9 @@ namespace FlappyPaimon
 		{
 			CheckForIllegalCrossThreadCalls = false;
 			InitializeComponent();
+			ResourcePath = Application.StartupPath + "\\Resources\\";
+			t0.Tick += (object o, EventArgs a) => Render();
+			t0.Start();
 		}
 		void InitGame()
 		{
@@ -45,12 +49,13 @@ namespace FlappyPaimon
 			InitDevices();
 			LoadImage();
 			UIWatch.Start();
-			LoadSounds();
-			t0.Tick += (object o, EventArgs a) => Render();
+			//LoadSounds();
+			BGMPlayer.MediaEnded += (object o, EventArgs a) => { PlayBGM(); };
+			t1.Tick+=(object o,EventArgs a)=> DispatchRender(); 
 			RCThread = new System.Threading.Thread(new System.Threading.ThreadStart(CompatibleLoop));
 			UseCompatibleMode = false;
 		}
-		Timer t0 = new Timer() { Interval = 1 };
+		Timer t0 = new Timer() { Interval = 1 },t1 = new Timer() { Interval = 1 };
 		void ReRest()
 		{
 			if (RestAni.Description == "up")
@@ -130,58 +135,25 @@ namespace FlappyPaimon
 		System.Windows.Media.MediaPlayer PressPlayer = new System.Windows.Media.MediaPlayer() { Volume = 1 };
 		System.Windows.Media.MediaPlayer PassPlayer = new System.Windows.Media.MediaPlayer() { Volume = 1 };
 		System.Windows.Media.MediaPlayer HitPlayer = new System.Windows.Media.MediaPlayer() { Volume = 1 };
-		string BGMName, HitName, PassName, PressName;
-		void LoadSounds()
-		{
-			//Delete old
-			var p = Process.GetProcessesByName(System.IO.Path.GetFileNameWithoutExtension(Application.ExecutablePath));
-			System.IO.FileInfo[] fi = new System.IO.DirectoryInfo(System.IO.Path.GetTempPath()).GetFiles("FlappyPaimon_*.mp3");
 
-			if (p.Length <= 1)
-			{
-				foreach (var f in fi)
-				{
-					f.Delete();
-				}
-			}
-			//Generate file
-			Random random = new Random();
-			BGMName = HitName = PassName = PressName = "FlappyPaimon_";
-			for (int i = 0; i < 16; i++)
-			{
-				BGMName += random.Next(0, 16).ToString("X");
-				HitName += random.Next(0, 16).ToString("X");
-				PassName += random.Next(0, 16).ToString("X");
-				PressName += random.Next(0, 16).ToString("X");
-			}
-			BGMName += ".mp3";
-			HitName += ".mp3";
-			PassName += ".mp3";
-			PressName += ".mp3";
-			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + BGMName, Properties.Resources.bgm);
-			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + HitName, Properties.Resources.hit);
-			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + PassName, Properties.Resources.pass);
-			System.IO.File.WriteAllBytes(System.IO.Path.GetTempPath() + "\\" + PressName, Properties.Resources.press);
-			BGMPlayer.MediaEnded += (object o, EventArgs a) => { PlayBGM(); };
-		}
 		void PlayBGM()
 		{
-			BGMPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + BGMName));
+			BGMPlayer.Open(new Uri(ResourcePath + "bgm.mp3"));
 			BGMPlayer.Play();
 		}
 		void PlayPress()
 		{
-			PressPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + PressName));
+			PressPlayer.Open(new Uri(ResourcePath + "press.mp3"));
 			PressPlayer.Play();
 		}
 		void PlayHit()
 		{
-			HitPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + HitName));
+			HitPlayer.Open(new Uri(ResourcePath + "hit.mp3"));
 			HitPlayer.Play();
 		}
 		void PlayPass()
 		{
-			PassPlayer.Open(new Uri(System.IO.Path.GetTempPath() + "\\" + PassName));
+			PassPlayer.Open(new Uri(ResourcePath + "pass.mp3"));
 			PassPlayer.Play();
 		}
 		THAnimations.EasyAni RestAni = new THAnimations.EasyAni() { Description = "up", From = -10, To = 10, EasingFunction = THAnimations.EasingFunction.PowerInOut, Pow = 2, Duration = 0.5 };
@@ -191,16 +163,16 @@ namespace FlappyPaimon
 			pState = pState == 0 ? pState = 1 : pState = 0;
 		}
 
-		const int UI_HEIGHT = 600;
-		const int MOVE_UNIT = 720;
-		int UI_WIDTH = 1024;
-		const int BG_WIDTH = 2048;
-		const int FOREST_WIDTH = 1604;
-		const int GROUND_LOCATION = 305;
-		const int TOP_0 = 30;
-		const int MAP_HEIGHT = 424;
+		public const int UI_HEIGHT = 600;
+		public const int MOVE_UNIT = 720;
+		public int UI_WIDTH = 1024;
+		public const int BG_WIDTH = 2048;
+		public const int FOREST_WIDTH = 1604;
+		public const int GROUND_LOCATION = 305;
+		public const int TOP_0 = 30;
+		public const int MAP_HEIGHT = 424;
 
-		int playState = 0;
+		int playState = -1;
 		int pState = 0;
 		long BeginTime = 0;
 		System.Timers.Timer pTimer = new System.Timers.Timer() { Interval = 333, Enabled = true };
@@ -209,35 +181,36 @@ namespace FlappyPaimon
 		double PLocation = 50, PRotation = 0;
 
 		Point MouseAbsolute = new Point();
+		Point ScreenAbsolute = new Point();
 		int EnterPosition = 0;
 		int TouchIndex = 0;
 		private void GameUI_MouseMove(object sender, MouseEventArgs e)
 		{
 			MouseAbsolute = e.Location;
 			MouseRelative = new Point(Convert.ToInt32(MouseAbsolute.X / (float)ClientSize.Width * UI_WIDTH), Convert.ToInt32(MouseAbsolute.Y / (float)ClientSize.Height * UI_HEIGHT));
+			ScreenRelative = new Point(Convert.ToInt32(MousePosition.X / (float)ClientSize.Width * UI_WIDTH), Convert.ToInt32(MousePosition.Y / (float)ClientSize.Height * UI_HEIGHT));
 			IsFSMouseOver = false;
 			if (MouseRelative.X >= UI_WIDTH - 54 && MouseRelative.X < UI_WIDTH - 6 && MouseRelative.Y >= 6 && MouseRelative.Y < 54)
 				IsFSMouseOver = true;
 			else IsFSMouseOver = false;
-			if (e.Button == MouseButtons.Left && CanSetTouch && playState != 2)
+			if (e.Button == MouseButtons.Left && CanSetTouch && playState != 2 &&ScreenAbsolute!=MousePosition)
 			{
-				int tempIndex = (EnterPosition - MouseRelative.Y) / 30;
+				int tempIndex = (EnterPosition - ScreenRelative.Y) / 30;
 				if (tempIndex > TouchIndex)
 				{
 					Press(sender, e);
 					TouchIndex = tempIndex;
 				}
 			}
+			ScreenAbsolute = MousePosition;
 		}
 		bool UseCompatibleMode = false;
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			if (isLoaded)
-			{
-				if (RCThread.IsAlive) RCThread.Abort();
-				if (RCThread.IsAlive) RCThread.Join();
-				RenderCompatible(e.Graphics);
-			}
+			if (playState == -1) return;
+			if (RCThread.IsAlive) RCThread.Abort();
+			if (RCThread.IsAlive) RCThread.Join();
+			RenderCompatible(e.Graphics);
 		}
 		int TmpFps = 0;
 		int Fps = 0;
@@ -245,6 +218,8 @@ namespace FlappyPaimon
 		bool ShowFPS = false;
 		public void Render()
 		{
+			if (this.WindowState != FormWindowState.Maximized && isFullScreen) FullScreen();
+			if (playState == -1) return;
 			CanSetTouch = true;
 			long tempGameSeconds = (UIWatch.ElapsedMilliseconds + EndWatch.ElapsedMilliseconds) / 1000;
 			if (tempGameSeconds != GameSeconds)
@@ -318,8 +293,11 @@ namespace FlappyPaimon
 				if (GameAni.GetValue() >= 100) RotationAni.Stop();
 			}
 			#endregion
-			if (this.WindowState != FormWindowState.Maximized && isFullScreen) FullScreen();
 			if (!isLoaded) { UIWatch.Restart(); PlayBGM(); isLoaded = true; }
+			//DispatchRender();
+		}
+		public void DispatchRender()
+		{
 			if (this.WindowState != FormWindowState.Minimized)
 			{
 				try
@@ -397,6 +375,7 @@ namespace FlappyPaimon
 				SharpGL.Win32.SwapBuffers(WindowDC);
 				Gl.Flush();
 				return;*/
+			if (playState == -1) return;
 			#region Direct2D
 			GameUI.BackgroundImage = null;
 			float density = (float)ClientSize.Height / UI_HEIGHT;
@@ -494,7 +473,7 @@ namespace FlappyPaimon
 						currentMatrix = Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
 					UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
 					RenderTarget.Transform = ConvertMatrix(currentMatrix);
-					RenderTarget.Transform = new RawMatrix3x2(RenderTarget.Transform.M11, RenderTarget.Transform.M12 , RenderTarget.Transform.M21, RenderTarget.Transform.M22, RenderTarget.Transform.M31, RenderTarget.Transform.M32);
+					RenderTarget.Transform = new RawMatrix3x2(RenderTarget.Transform.M11, RenderTarget.Transform.M12, RenderTarget.Transform.M21, RenderTarget.Transform.M22, RenderTarget.Transform.M31, RenderTarget.Transform.M32);
 					RenderTarget.DrawBitmap(PCurrent, RelRectangleF((UI_WIDTH - PCurrent.PixelSize.Width) / 2,
 				  (float)((UI_HEIGHT) * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) - PCurrent.PixelSize.Height / 2 + TOP_0, PCurrent.PixelSize.Width, PCurrent.PixelSize.Height), 1, BitmapInterpolationMode.NearestNeighbor);
 				}
@@ -610,14 +589,12 @@ namespace FlappyPaimon
 
 		private void Form1_ResizeBegin(object sender, EventArgs e)
 		{
-			if(isLoaded)
-			t0.Start();
+			if (playState != -1) t1.Start();
 		}
 
 		private void Form1_ResizeEnd(object sender, EventArgs e)
 		{
-			if (isLoaded)
-				t0.Stop();
+			if (playState != -1) t1.Stop();
 		}
 
 		void GLLoadBitmap(System.Drawing.Bitmap source)
@@ -638,9 +615,13 @@ namespace FlappyPaimon
 		bool isinited = false;
 		System.Drawing.Bitmap renderBitmap;
 		System.Threading.Thread RCThread;
+		[DllImport("gdi32.dll")]
+		public static extern bool BitBlt(IntPtr hdcDest, int nXDest, int nYDest, int wDest, int hDest, IntPtr hdcSource, int xSrc, int ySrc, CopyPixelOperation rop);
+		[DllImport("user32.dll")]
+		public static extern bool ReleaseDC(IntPtr hWND, IntPtr hDC);
 		public void RenderCompatible(Graphics g)
 		{
-			if (!isLoaded) return;
+			if (!isLoaded || playState == -1) return;
 			float density = (float)ClientSize.Height / UI_HEIGHT;
 			float din = (float)Math.Ceiling(density * 2) / 2;
 			UI_WIDTH = (int)(ClientSize.Width / density);
@@ -733,11 +714,11 @@ namespace FlappyPaimon
 				else
 				{
 					PCurrent = Properties.Resources.pDead;
-					if(RotationAni.IsAnimating)
-					rMatrix = Matrix3x2.CreateRotation((float)(RotationAni.GetValue() / 180 * Math.PI), new Vector2(
-						UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
+					if (RotationAni.IsAnimating)
+						rMatrix = Matrix3x2.CreateRotation((float)(RotationAni.GetValue() / 180 * Math.PI), new Vector2(
+							UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
 					else
-						rMatrix = Matrix3x2.CreateRotation((float)(PRotation/ 180 * Math.PI), new Vector2(
+						rMatrix = Matrix3x2.CreateRotation((float)(PRotation / 180 * Math.PI), new Vector2(
 							UI_WIDTH / 2, (float)(UI_HEIGHT * (GameAni.GetValue() / 100) * (GROUND_LOCATION / (float)MAP_HEIGHT)) + TOP_0));
 					bGraphics.Transform = new System.Drawing.Drawing2D.Matrix(rMatrix.M11 * din, rMatrix.M12 * din, rMatrix.M21 * din, rMatrix.M22 * din, rMatrix.M31 * din, rMatrix.M32 * din);
 					bGraphics.DrawImage(PCurrent, (UI_WIDTH - PCurrent.Size.Width) / 2,
@@ -849,6 +830,7 @@ namespace FlappyPaimon
 			return attributes;
 		}
 		Point MouseRelative = new Point();
+		Point ScreenRelative = new Point();
 		bool IsFSMouseOver = false;
 		void GetYuanshi(Yuanshi yuanshi)
 		{
@@ -991,6 +973,14 @@ namespace FlappyPaimon
 		{
 			var ustate = this.WindowState;
 			base.WndProc(ref m);
+			if (playState != -1)
+			{
+				float DPI = this.CreateGraphics().DpiX / 96;
+				if(this.FormBorderStyle==FormBorderStyle.Sizable)
+					this.MinimumSize = new Size(this.Width - this.ClientSize.Width + Convert.ToInt32(320 * DPI), this.Height - this.ClientSize.Height + Convert.ToInt32(240 * DPI));
+				else
+					this.MinimumSize = new Size(0, 0);
+			}
 		}
 		private void GameUI_MouseClick(object sender, MouseEventArgs e)
 		{
@@ -1032,7 +1022,7 @@ namespace FlappyPaimon
 			if (CanSetTouch)
 			{
 				TouchIndex = 0;
-				EnterPosition = MouseRelative.Y;
+				EnterPosition = ScreenRelative.Y;
 			}
 		}
 		public void FullScreen()
@@ -1068,6 +1058,7 @@ namespace FlappyPaimon
 		THAnimations.EasyAni RotationAni;
 		private void Press(object sender, EventArgs e)
 		{
+			if (playState == -1) return;
 			if (playState == 0)
 			{
 				EndWatch.Stop();
@@ -1138,6 +1129,7 @@ namespace FlappyPaimon
 				playState = 0;
 				Score = 0;
 				EndWatch.Restart(); EndWatch.Stop();
+				GameAni.Restart();GameAni.Stop();
 				PlayBGM();
 				TmpFps = 0;
 				Fps = 0;
@@ -1165,7 +1157,7 @@ namespace FlappyPaimon
 					PLocation = GameAni.GetValue();
 				if (GameAni.GetValue() >= 100)
 				{
-					GameAni.To = 100+PRotation/30; GameAni.Stop();
+					GameAni.To = 100 + PRotation / 30; GameAni.Stop();
 					RotationAni.To = RotationAni.GetValue(); RotationAni.Stop();
 				}
 			};
@@ -1237,20 +1229,7 @@ namespace FlappyPaimon
 		}
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			if (RCThread != null && RCThread.IsAlive) RCThread.Abort();
-			//GameUI.CreateGraphics().DrawString("Application is closing. Please wait...", new Font("", 12), new SolidBrush(Color.Black), new Point());
 			this.Hide();
-			BGMPlayer.Stop();
-			HitPlayer.Stop();
-			PassPlayer.Stop();
-			if (System.IO.File.Exists(System.IO.Path.GetTempPath() + "\\" + HitName))
-				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + HitName);
-			if (System.IO.File.Exists(System.IO.Path.GetTempPath() + "\\" + PassName))
-				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + PassName);
-			if (System.IO.File.Exists(System.IO.Path.GetTempPath() + "\\" + PressName))
-				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + PressName);
-			if (System.IO.File.Exists(System.IO.Path.GetTempPath() + "\\" + BGMName))
-				System.IO.File.Delete(System.IO.Path.GetTempPath() + "\\" + BGMName);
 			System.Environment.Exit(0);
 		}
 		IntPtr WindowDC;
@@ -1261,7 +1240,8 @@ namespace FlappyPaimon
 			this.Controls.Add(loadControl);
 			loadControl.Dock = DockStyle.Fill;
 			loadControl.Failed = (object o, EventArgs a) => { };
-			loadControl.Completed = (object o, EventArgs a) => { loadControl.LoadResources(); InitGame(); this.Controls.Remove(loadControl); loadControl.Dispose(); };
+			loadControl.Completed = (object o, EventArgs a) => { playState = 0; loadControl.LoadResources(); InitGame(); this.Controls.Remove(loadControl); loadControl.Dispose(); };
+
 			this.Left = (SystemInformation.WorkingArea.Width - this.Width) / 2;
 			this.Top = (SystemInformation.WorkingArea.Height - this.Height) / 2;
 			if (this.Width > SystemInformation.WorkingArea.Width || this.Height > SystemInformation.WorkingArea.Height) FullScreen();

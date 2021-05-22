@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <file name="title.png" src="https://resource.evk6.cn/cloudPackage/424734696379777024/214101/h5/1.00.03/214101-1.00.03-h5/assets/images/417256283.png"/>
+    <array src="https://resource.evk6.cn/cloudPackage/424734696379777024/214101/h5/1.00.03/214101-1.00.03-h5/assets/images/1972943305.png">
+        <crop rect="0 0 58 78" name="pnormal.png"/>
+        <crop rect="59 0 58 78" name="pdead.png"/>
+    </array>
     <file name="preserve1.png" src="https://resource.evk6.cn/cloudPackage/424734696379777024/214101/h5/1.00.03/214101-1.00.03-h5/assets/images/330338828.png"/><!--bainianji-->
     <file name="cloud.png" src="https://resource.evk6.cn/cloudPackage/424734696379777024/214101/h5/1.00.03/214101-1.00.03-h5/assets/images/2060294969.png"/>
     <base64 name="DisableSound.png">
@@ -24,10 +28,6 @@
         <crop rect="131 26 60 60" name="particle2.png"/>
         <crop rect="30 145 46 54" name="particle3.png"/>
         <crop rect="218 0 30 36" name="particle4.png"/>
-    </array>
-    <array src="https://resource.evk6.cn/cloudPackage/424734696379777024/214101/h5/1.00.03/214101-1.00.03-h5/assets/images/1972943305.png">
-        <crop rect="0 0 58 78" name="pnormal.png"/>
-        <crop rect="59 0 58 78" name="pdead.png"/>
     </array>
     <!--file name="pfly.png" src="https://resource.evk6.cn/cloudPackage/424734696379777024/214101/h5/1.00.03/214101-1.00.03-h5/assets/images/283248418.png"/-->
     <array src="https://resource.evk6.cn/cloudPackage/424734696379777024/214101/h5/1.00.03/214101-1.00.03-h5/assets/images/283248418.png">

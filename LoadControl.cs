@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,6 +18,8 @@ namespace FlappyPaimon
 			CheckForIllegalCrossThreadCalls = false;
 			this.SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw, true);
 			ResTimer.Tick += ResTimer_Tick;
+			Random random = new Random(); random.NextDouble();
+			LoadStyle = Convert.ToInt32(random.NextDouble());
 		}
 
 		private void LoadControl_Load(object sender, EventArgs e)
@@ -26,8 +28,8 @@ namespace FlappyPaimon
 
 		private void ResTimer_Tick(object sender, EventArgs e)
 		{
-			System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(Application.StartupPath + "\\Resources\\");
-			FileCount = di.GetFiles().Length;
+			//System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(Application.StartupPath + "\\Resources\\");
+			//FileCount = di.GetFiles().Length;
 			this.Refresh();
 			if(IsFailed)
 			{
@@ -43,47 +45,80 @@ namespace FlappyPaimon
 		const int UI_HEIGHT = 600;
 		int FileCount = 0;
 		int ResCount = 32;
+		string ErrCode = "";
+		int LoadStyle = 0;
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
+            float DPI = e.Graphics.DpiX / 96;
 			int UI_WIDTH = Convert.ToInt32((float)UI_HEIGHT / this.Height * this.Width);
 			e.Graphics.Clear(Color.White);
 			e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-			e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 			e.Graphics.ScaleTransform(Width / (float)UI_WIDTH, Height / (float)UI_HEIGHT);
+			float scale = Height / (float)UI_HEIGHT;
+			if (Math.Abs(scale*2 - Convert.ToInt32(scale*2)) <= 0.01)
+				e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+			else
+				e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 			if (!IsFailed)
 			{
-				var font = new Font(System.Drawing.SystemFonts.MenuFont.FontFamily, 32);
+				var font = new Font(System.Drawing.SystemFonts.MenuFont.FontFamily, 32/DPI);
 				var content = "Loading resources...";
+				if (IsCompleted) content = "Done!";
 				SizeF measureSize = e.Graphics.MeasureString(content, font);
 				e.Graphics.DrawString(content, font, Brushes.Black, new RectangleF(UI_WIDTH / 2 - measureSize.Width / 2, 470, measureSize.Width, measureSize.Height));
 				string resPath = Application.StartupPath + "\\Resources\\";
-				if (System.IO.File.Exists(resPath + "title.png") && FileCount != 0)
+				font.Dispose();
+				if(IsCompleted)
 				{
 					Bitmap Title = Bitmap.FromFile(resPath + "title.png") as Bitmap;
-					Bitmap ProgressMap = new Bitmap(Convert.ToInt32(Title.Width / (float)ResCount * FileCount), Title.Height);
-					Graphics.FromImage(ProgressMap).DrawImage(Title, new Point(0, 0));
-					e.Graphics.DrawImage(ProgressMap, new Rectangle(UI_WIDTH / 2 - Title.Width / 2, 96,ProgressMap.Width,Title.Height));
+					e.Graphics.DrawImage(Title, new Rectangle(UI_WIDTH / 2 - Title.Width / 2, 96, Title.Width, Title.Height));
 					Title.Dispose();
-					ProgressMap.Dispose();
+					Bitmap PCurrent = Bitmap.FromFile(resPath + "pnormal.png") as Bitmap;
+					e.Graphics.DrawImage(PCurrent, (UI_WIDTH - PCurrent.Size.Width) / 2,
+					(float)((UI_HEIGHT - PCurrent.Size.Height) / 2 * (Form1.GROUND_LOCATION / (float)Form1.MAP_HEIGHT) + Form1.TOP_0)
+				, PCurrent.Size.Width, PCurrent.Size.Height);
 				}
-				font.Dispose();
+				else
+				{
+					if (LoadStyle == 0 && System.IO.File.Exists(resPath + "title.png") && FileCount != 0)
+					{
+						Bitmap Title = Bitmap.FromFile(resPath + "title.png") as Bitmap;
+						Bitmap ProgressMap = new Bitmap(Convert.ToInt32(Title.Width / (float)ResCount * FileCount), Title.Height);
+						Graphics.FromImage(ProgressMap).DrawImage(Title, new Point(0, 0));
+						e.Graphics.DrawImage(ProgressMap, new Rectangle(UI_WIDTH / 2 - Title.Width / 2, 96, ProgressMap.Width, Title.Height));
+						Title.Dispose();
+						ProgressMap.Dispose();
+					}
+					else if (LoadStyle == 1 && System.IO.File.Exists(resPath + "pnormal.png") && FileCount != 0)
+					{
+						Bitmap PBitmap = Bitmap.FromFile(resPath + "pnormal.png") as Bitmap;
+						Bitmap ProgressMap = new Bitmap(PBitmap.Width, Convert.ToInt32(PBitmap.Height / (float)ResCount * FileCount));
+						Graphics.FromImage(ProgressMap).DrawImage(PBitmap, new Point(0, ProgressMap.Height - PBitmap.Height));
+						PointF PLocation = new PointF((UI_WIDTH - PBitmap.Size.Width) / 2, (float)((UI_HEIGHT - PBitmap.Size.Height) / 2 * (Form1.GROUND_LOCATION / (float)Form1.MAP_HEIGHT) + Form1.TOP_0));
+						e.Graphics.DrawImage(ProgressMap, new PointF(PLocation.X, PLocation.Y - ProgressMap.Height + PBitmap.Height));
+						PBitmap.Dispose();
+						ProgressMap.Dispose();
+					}
+				}
 			}
 			else
 			{
-				e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 				e.Graphics.DrawImage(Properties.Resources.Failed, new Rectangle(UI_WIDTH / 2 - Properties.Resources.Failed.Width / 2, 84, Properties.Resources.Failed.Width, Properties.Resources.Failed.Height));
 				e.Graphics.TranslateTransform(0, -20);
-				var font = new Font(System.Drawing.SystemFonts.MenuFont.FontFamily, 32);
+				var font = new Font(System.Drawing.SystemFonts.MenuFont.FontFamily, 32/DPI);
 				var content = "Failed to load resources.\nPlease check your network settings.";
 				SizeF measureSize = e.Graphics.MeasureString(content, font);
 				SizeF normalSize = e.Graphics.MeasureString("Exit", font);
 				e.Graphics.DrawString(content, font, Brushes.Black, new RectangleF(UI_WIDTH / 2 - measureSize.Width / 2, 490-normalSize.Height, measureSize.Width, measureSize.Height),
 				new StringFormat() { Alignment = StringAlignment.Center });
-				font = new Font(System.Drawing.SystemFonts.MenuFont.FontFamily, 16);
+				font = new Font(System.Drawing.SystemFonts.MenuFont.FontFamily, 16/DPI);
 				e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x00, 0x78, 0xd7)), new Rectangle(UI_WIDTH / 2 - 40, 555, 80, 30));
 				normalSize = e.Graphics.MeasureString("Exit", font);
 				e.Graphics.DrawString("Exit", font, Brushes.White, new RectangleF(UI_WIDTH / 2 - normalSize.Width / 2, 556, normalSize.Width, normalSize.Height),
+				new StringFormat() { Alignment = StringAlignment.Center });
+				normalSize = e.Graphics.MeasureString(ErrCode, font);
+				e.Graphics.DrawString(ErrCode, font, Brushes.Black, new RectangleF(UI_WIDTH / 2 - normalSize.Width / 2, 250, normalSize.Width, normalSize.Height),
 				new StringFormat() { Alignment = StringAlignment.Center });
 			}
 		}
@@ -110,14 +145,15 @@ namespace FlappyPaimon
 						string path = Application.StartupPath + "\\Resources\\" + name;
 						if (System.IO.File.Exists(path) == false)
 						{
-							System.Net.HttpWebResponse res;
+							System.Net.HttpWebResponse res=null;
 							System.Net.WebRequest request = System.Net.WebRequest.Create(src);
 							try
 							{
 								res = request.GetResponse() as System.Net.HttpWebResponse;
 							}
-							catch
+							catch(Exception ex)
 							{
+								ErrCode = ex.Message;
 								IsFailed = true;
 								return;
 							}
@@ -132,14 +168,19 @@ namespace FlappyPaimon
 								System.IO.File.WriteAllBytes(path, fByte);
 							}
 						}
+						FileCount++;
 					}
-					if (x.Name == "base64")
+					if (x.Name == "base64")//???
 					{
 						string name = "";
 						foreach (System.Xml.XmlAttribute attr in x.Attributes) if (attr.Name == "name") name = attr.Value;
 						string path = Application.StartupPath + "\\Resources\\" + name;
-						byte[] data = Convert.FromBase64String(x.InnerText);
-						System.IO.File.WriteAllBytes(path, data);
+						if (System.IO.File.Exists(path) == false)
+						{
+							byte[] data = Convert.FromBase64String(x.InnerText);
+							System.IO.File.WriteAllBytes(path, data);
+						}
+						FileCount++;
 					}
 					if (x.Name == "array")
 					{
@@ -151,18 +192,20 @@ namespace FlappyPaimon
 							string cropName = "";
 							foreach (System.Xml.XmlAttribute cAttr in crop.Attributes) if (cAttr.Name == "name") cropName = cAttr.Value;
 							if (System.IO.File.Exists(Application.StartupPath + "\\Resources\\" + cropName) == false) fullExist = false;
+							else FileCount++;
 						}
 						System.Drawing.Image aImage = null;
 						if (!fullExist)
 						{
-							System.Net.HttpWebResponse res;
+							System.Net.HttpWebResponse res=null;
 							System.Net.WebRequest request = System.Net.WebRequest.Create(src);
 							try
 							{
 								res = request.GetResponse() as System.Net.HttpWebResponse;
 							}
-							catch
+							catch(Exception ex)
 							{
+								ErrCode = ex.Message;
 								IsFailed = true;
 								return;
 							}
@@ -196,7 +239,10 @@ namespace FlappyPaimon
 									Bitmap childMap = new Bitmap(rect[2], rect[3]);
 									Graphics.FromImage(childMap).DrawImage(aImage, new Rectangle(-rect[0], -rect[1], aImage.Width, aImage.Height));
 									if (System.IO.File.Exists(Application.StartupPath + "\\Resources\\" + cropName) == false)
+									{
 										childMap.Save(Application.StartupPath + "\\Resources\\" + cropName);
+										FileCount++;
+									}
 									childMap.Dispose();
 								}
 								if (aImage != null)
