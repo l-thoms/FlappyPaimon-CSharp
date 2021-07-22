@@ -89,9 +89,6 @@
     <Reference Include="SharpDX.DXGI, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>packages\SharpDX.DXGI.4.2.0\lib\net40\SharpDX.DXGI.dll</HintPath>
     </Reference>
-    <Reference Include="SharpGL, Version=3.1.1.0, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
-      <HintPath>packages\SharpGL.3.1.1\lib\net45\SharpGL.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.AppContext.4.3.0\lib\net46\System.AppContext.dll</HintPath>
@@ -157,11 +154,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EasyAni.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Logics.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Logics.Designer.cs">
+      <DependentUpon>Logics.cs</DependentUpon>
     </Compile>
     <Compile Include="LoadControl.cs">
       <SubType>UserControl</SubType>
@@ -169,10 +166,13 @@
     <Compile Include="LoadControl.Designer.cs">
       <DependentUpon>LoadControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Render.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="Logics.resx">
+      <DependentUpon>Logics.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LoadControl.resx">
       <DependentUpon>LoadControl.cs</DependentUpon>

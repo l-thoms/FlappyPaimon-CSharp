@@ -50,7 +50,6 @@
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseClick);
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.GameUI_MouseMove);
-			this.Resize += new System.EventHandler(this.Form1_Resize);
 			this.ResumeLayout(false);
 
 		}
